@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Caixa IA</title>
+<style>
+:root{--azul:#1F3864;--azul2:#2E75B6;--am:#FFD966;--verde:#27ae60;--vbg:#E2EFDA;--verm:#c0392b;--rbg:#FFE0E0;--roxo:#8e44ad;--lj:#e67e22;--cinza:#F2F2F2;--borda:#BFBFBF;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,Arial,sans-serif;background:#eef2f7;font-size:15px;padding-bottom:90px;}
+.header{background:var(--azul);color:white;padding:14px 16px 10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px #0003;}
+.header h1{font-size:15px;font-weight:700;}
+.header p{font-size:11px;opacity:.75;margin-top:2px;}
+.hrow{display:flex;justify-content:space-between;align-items:flex-start;}
+.badge{background:var(--lj);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;}
+.tabs{display:flex;background:var(--azul2);position:sticky;top:60px;z-index:99;}
+.tab{flex:1;text-align:center;padding:9px 4px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;user-select:none;}
+.tab.active{color:white;border-bottom-color:var(--am);}
+.tab i{display:block;font-size:18px;margin-bottom:1px;font-style:normal;}
+.page{display:none;padding:12px;}
+.page.active{display:block;}
+.card{background:white;border-radius:12px;box-shadow:0 1px 4px #0001;margin-bottom:12px;overflow:hidden;}
+.ch{background:var(--azul2);color:white;padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.fr{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0;}
+.fr:last-child{border-bottom:none;}
+.fl{flex:1;font-size:14px;color:#333;}
+.fl small{display:block;font-size:11px;color:#999;margin-top:1px;}
+.fi{width:130px;text-align:right;border:1.5px solid var(--borda);border-radius:8px;padding:8px 10px;font-size:15px;font-weight:600;background:var(--am);color:#333;}
+.fi:focus{outline:none;border-color:var(--azul2);}
+.fi.ro{background:var(--vbg);border-color:#b2dfb2;color:var(--verde);font-weight:700;}
+.fi.rr{background:var(--rbg);border-color:#ffb2b2;color:var(--verm);font-weight:700;}
+.tbox{margin:12px;padding:16px;border-radius:12px;text-align:center;}
+.tbox.v{background:var(--vbg);border:2px solid var(--verde);}
+.tbox.r{background:var(--rbg);border:2px solid var(--verm);}
+.tbox .lbl{font-size:12px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.tbox .val{font-size:28px;font-weight:800;margin:4px 0;}
+.tbox.v .val{color:var(--verde);}
+.tbox.r .val{color:var(--verm);}
+.tbox .sub{font-size:12px;color:#888;}
+.ir{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.ir:last-child{border-bottom:none;}
+.ir .l{color:#555;}.ir .v{font-weight:700;color:#222;}
+.ir .v.ok{color:var(--verde);}.ir .v.nok{color:var(--verm);}
+.el{display:grid;grid-template-columns:1fr 95px 95px 44px;gap:4px;padding:8px 14px;border-bottom:1px solid #f0f0f0;align-items:center;font-size:13px;}
+.el:last-child{border-bottom:none;}
+.el .n{color:#444;font-weight:600;}
+.el input{border:1.5px solid var(--borda);border-radius:6px;padding:6px;font-size:13px;text-align:right;background:var(--am);width:100%;}
+.el input:focus{outline:none;border-color:var(--azul2);}
+.el .pv{text-align:right;color:#555;font-size:12px;}
+.el .st{text-align:center;font-size:16px;}
+.eh{display:grid;grid-template-columns:1fr 95px 95px 44px;gap:4px;padding:6px 14px;background:#f7f7f7;font-size:11px;font-weight:700;color:#666;border-bottom:1px solid #eee;}
+.brow{display:flex;gap:10px;padding:12px;flex-wrap:wrap;}
+.bb{flex:1;min-width:110px;padding:14px 10px;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 6px #0002;transition:transform .1s;-webkit-appearance:none;color:white;}
+.bb:active{transform:scale(.96);}
+.bb i{font-size:22px;font-style:normal;}
+.bb.roxo{background:var(--roxo);}
+.bb.lj{background:var(--lj);}
+.bb.verde{background:var(--verde);}
+.bb.wpp{background:#25D366;}
+.bb.azul{background:var(--azul);}
+.bb.cinza{background:#666;}
+.bb.verm{background:var(--verm);}
+.foto-area{margin:12px;border:2px dashed #c39bd3;border-radius:12px;padding:24px 16px;text-align:center;background:#faf5ff;cursor:pointer;}
+.foto-area p{color:#888;font-size:13px;margin-top:8px;}
+#foto-preview{width:100%;border-radius:10px;margin:12px 0;display:none;}
+.lbox{display:none;flex-direction:column;align-items:center;gap:10px;padding:20px;font-weight:700;}
+.lbox.show{display:flex;}
+.spin{width:34px;height:34px;border:4px solid #ddd;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.iabox{display:none;margin:0 12px 12px;background:var(--vbg);border:1.5px solid var(--verde);border-radius:10px;overflow:hidden;}
+.iabox.show{display:block;}
+.iabh{background:var(--verde);color:white;padding:8px 14px;font-size:13px;font-weight:700;}
+.iai{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #c8e6c9;font-size:13px;}
+.iai:last-child{border-bottom:none;}
+.iai .k{color:#555;}.iai .v{font-weight:700;}
+.rbox{margin:0;padding:16px;background:#fffbf0;font-size:14px;line-height:1.7;color:#333;white-space:pre-wrap;min-height:60px;}
+.obs-a{width:100%;border:1.5px solid var(--borda);border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;}
+.meta{display:flex;gap:10px;padding:10px 12px;background:white;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 4px #0001;}
+.meta input{flex:1;padding:10px 12px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;background:var(--am);}
+.meta input:focus{outline:none;border-color:var(--azul2);}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;padding:6px 0 8px;z-index:100;box-shadow:0 -2px 10px #0001;}
+.ni{flex:1;text-align:center;cursor:pointer;padding:4px 0;color:#999;font-size:10px;font-weight:600;user-select:none;}
+.ni.active{color:var(--azul2);}
+.ni i{display:block;font-size:22px;line-height:1;margin-bottom:2px;font-style:normal;}
+.vg{display:grid;grid-template-columns:1fr 1fr;}.vg .fr{border-right:1px solid #f0f0f0;}
+.vg .fr:nth-child(even){border-right:none;}
+.bar-wrap{padding:0 14px 8px;}
+.bar-bg{height:6px;background:#eee;border-radius:4px;}
+.bar-fg{height:100%;background:var(--azul2);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hrow">
+    <div><h1>Fechamento de Caixa</h1><p>Auto Peças Oseni &amp; Marcelo</p></div>
+    <div class="badge">✨ IA</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="goTab(0)"><i>📋</i>Lançar</div>
+  <div class="tab" onclick="goTab(1)"><i>📊</i>Resumo</div>
+  <div class="tab" onclick="goTab(2)"><i>🔍</i>ERP</div>
+  <div class="tab" onclick="goTab(3)"><i>🤖</i>IA</div>
+</div>
+
+<!-- PAGE 0: LANÇAMENTO -->
+<div class="page active" id="pg0">
+  <div class="meta">
+    <input type="text" id="data" placeholder="📅 dd/mm/aaaa" oninput="calcular()">
+    <input type="text" id="operador" placeholder="👤 Operador" oninput="salvarAuto()">
+  </div>
+
+  <div class="card">
+    <div class="ch">💳 Meios de Pagamento</div>
+    <div class="fr"><div class="fl">Dinheiro<small>notas + moedas</small></div><input class="fi" type="number" id="pg_din" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl">Crédito<small>Master + Visa + Amex</small></div><input class="fi" type="number" id="pg_cred" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl">Débito<small>Master + Visa + Elo</small></div><input class="fi" type="number" id="pg_deb" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl">PIX</div><input class="fi" type="number" id="pg_pix" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl">Vale / Devolução</div><input class="fi" type="number" id="pg_vale" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl">Sangria</div><input class="fi" type="number" id="pg_sangria" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl">Despesa / CASCO</div><input class="fi" type="number" id="pg_despesa" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl"><strong>Subtotal</strong></div><input class="fi ro" type="text" id="a_subtotal" readonly value="R$ 0,00"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch">🏦 Abertura de Caixa</div>
+    <div class="fr"><div class="fl">Valor de abertura</div><input class="fi" type="number" id="b_abertura" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch">👥 Vendas por Vendedor</div>
+    <div class="vg">
+      <div class="fr"><div class="fl">Marcio</div><input class="fi" style="width:100px" type="number" id="v_marcio" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+      <div class="fr"><div class="fl">Diogo</div><input class="fi" style="width:100px" type="number" id="v_diogo" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+      <div class="fr"><div class="fl">Cláudio</div><input class="fi" style="width:100px" type="number" id="v_claudio" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+      <div class="fr"><div class="fl">Rafael</div><input class="fi" style="width:100px" type="number" id="v_rafael" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+      <div class="fr"><div class="fl">Rodrigo</div><input class="fi" style="width:100px" type="number" id="v_rodrigo" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+      <div class="fr"><div class="fl"><input type="text" id="v_outro_nome" placeholder="Outro..." style="border:none;background:none;font-size:14px;width:70px" oninput="salvarAuto()"></div><input class="fi" style="width:100px" type="number" id="v_outro" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    </div>
+    <div class="fr"><div class="fl">Fiado<small>controle paralelo</small></div><input class="fi" type="number" id="pg_fiado" step="0.01" placeholder="0,00" oninput="calcular()"></div>
+    <div class="fr"><div class="fl"><strong>Total + Fiado</strong></div><input class="fi ro" type="text" id="v_total_fiado" readonly value="R$ 0,00"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch">📝 Observações</div>
+    <div style="padding:12px"><textarea class="obs-a" id="obs" rows="3" placeholder="Diferenças, ocorrências, motivos..." oninput="salvarAuto()"></textarea></div>
+  </div>
+
+  <div class="brow">
+    <button class="bb verde" onclick="salvarDados()"><i>💾</i>Salvar</button>
+    <button class="bb cinza" onclick="limparTudo()"><i>🗑️</i>Novo</button>
+  </div>
+</div>
+
+<!-- PAGE 1: RESUMO -->
+<div class="page" id="pg1">
+  <div style="padding:12px 12px 0">
+    <div class="tbox v" id="box-total">
+      <div class="lbl">Total do Caixa</div>
+      <div class="val" id="res_total">R$ 0,00</div>
+      <div class="sub" id="res_sub">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">📋 Detalhamento</div>
+    <div class="ir"><span class="l">Dinheiro</span><span class="v" id="res_din">—</span></div>
+    <div class="ir"><span class="l">Crédito</span><span class="v" id="res_cred">—</span></div>
+    <div class="ir"><span class="l">Débito</span><span class="v" id="res_deb">—</span></div>
+    <div class="ir"><span class="l">PIX</span><span class="v" id="res_pix">—</span></div>
+    <div class="ir"><span class="l">Vale / Devolução</span><span class="v" id="res_vale">—</span></div>
+    <div class="ir"><span class="l">Sangria</span><span class="v" id="res_sangria">—</span></div>
+    <div class="ir"><span class="l">Despesa</span><span class="v" id="res_despesa">—</span></div>
+    <div class="ir" style="border-top:2px solid #eee"><span class="l"><strong>Subtotal</strong></span><span class="v" id="res_subtotal">—</span></div>
+    <div class="ir"><span class="l">Abertura</span><span class="v" id="res_abertura">—</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch">⚖️ Conferência ERP</div>
+    <div class="ir"><span class="l">Total Caixa (papel)</span><span class="v" id="res_tcaixa">—</span></div>
+    <div class="ir"><span class="l">Total ERP</span><span class="v" id="res_erp">—</span></div>
+    <div class="ir"><span class="l"><strong>Diferença</strong></span><span class="v" id="res_dif">—</span></div>
+    <div class="ir"><span class="l">Conf. interna</span><span class="v" id="res_conf">—</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch">🏆 Vendedores</div>
+    <div id="res_vendedores"><div class="ir" style="color:#aaa;font-size:13px">Nenhum lançado</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch" style="background:var(--lj)">🤖 Resumo por IA</div>
+    <div class="lbox" id="resumo-loading" style="color:var(--lj)">
+      <div class="spin" style="border-top-color:var(--lj)"></div>
+      <span>Gerando resumo...</span>
+    </div>
+    <div class="rbox" id="resumo-texto">Toque em "Gerar Resumo" abaixo.</div>
+  </div>
+
+  <div class="brow">
+    <button class="bb lj" onclick="gerarResumo()"><i>🤖</i>Gerar Resumo</button>
+    <button class="bb wpp" onclick="compartilharWpp()"><i>💬</i>WhatsApp</button>
+  </div>
+</div>
+
+<!-- PAGE 2: ERP -->
+<div class="page" id="pg2">
+  <div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;color:#555;line-height:1.6;box-shadow:0 1px 4px #0001">
+    📱 Abra o ERP → <strong>Resumo Livro Caixa</strong> → <strong>Formas de Pagamento</strong> → coluna <strong>ENTRADA</strong>
+  </div>
+
+  <div class="card">
+    <div class="ch">🔍 Papel vs ERP</div>
+    <div class="eh"><span>Forma</span><span style="text-align:right">Papel</span><span style="text-align:right">ERP</span><span style="text-align:center">OK?</span></div>
+    <div class="el"><span class="n">Dinheiro</span><span class="pv" id="erp_din_p">0,00</span><input type="number" id="e_din" step="0.01" placeholder="0,00" oninput="calcular()"><span class="st" id="erp_din_st">—</span></div>
+    <div class="el"><span class="n">Crédito</span><span class="pv" id="erp_cred_p">0,00</span><input type="number" id="e_cred" step="0.01" placeholder="0,00" oninput="calcular()"><span class="st" id="erp_cred_st">—</span></div>
+    <div class="el"><span class="n">Débito</span><span class="pv" id="erp_deb_p">0,00</span><input type="number" id="e_deb" step="0.01" placeholder="0,00" oninput="calcular()"><span class="st" id="erp_deb_st">—</span></div>
+    <div class="el"><span class="n">PIX</span><span class="pv" id="erp_pix_p">0,00</span><input type="number" id="e_pix" step="0.01" placeholder="0,00" oninput="calcular()"><span class="st" id="erp_pix_st">—</span></div>
+    <div class="el"><span class="n">Vale/Dev</span><span class="pv" id="erp_vale_p">0,00</span><input type="number" id="e_vale" step="0.01" placeholder="0,00" oninput="calcular()"><span class="st" id="erp_vale_st">—</span></div>
+    <div class="el" style="font-weight:700;background:#f7f7f7"><span class="n">TOTAL</span><span class="pv" id="erp_tot_p">0,00</span><input type="number" id="b_erp" step="0.01" placeholder="Total" oninput="calcular()" style="font-weight:700"><span class="st" id="erp_tot_st">—</span></div>
+  </div>
+</div>
+
+<!-- PAGE 3: IA -->
+<div class="page" id="pg3">
+  <div class="card">
+    <div class="ch" style="background:var(--roxo)">📸 Ler Papel por Foto</div>
+    <label class="foto-area" for="foto-input">
+      <div style="font-size:48px">📄</div>
+      <p><strong>Toque para tirar foto</strong></p>
+      <p>ou escolher da galeria</p>
+    </label>
+    <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="lerFoto(this)">
+    <img id="foto-preview" alt="">
+    <div class="lbox" id="foto-loading" style="color:var(--roxo)">
+      <div class="spin" style="border-top-color:var(--roxo)"></div>
+      <span>Analisando o papel...</span>
+    </div>
+  </div>
+
+  <div class="iabox" id="ia-resultado">
+    <div class="iabh">✅ Valores identificados — confirme</div>
+    <div id="ia-lista"></div>
+    <div style="padding:12px">
+      <button class="bb verde" style="width:100%;flex-direction:row;gap:8px;padding:14px;justify-content:center" onclick="aplicarValores()">
+        <i style="font-size:18px">✅</i> Aplicar ao formulário
+      </button>
+    </div>
+  </div>
+
+  <div class="brow">
+    <button class="bb lj" onclick="gerarResumo();goTab(1)"><i>📝</i>Gerar Resumo</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="nav">
+  <div class="ni active" id="nav0" onclick="goTab(0)"><i>📋</i>Lançar</div>
+  <div class="ni" id="nav1" onclick="goTab(1)"><i>📊</i>Resumo</div>
+  <div class="ni" id="nav2" onclick="goTab(2)"><i>🔍</i>ERP</div>
+  <div class="ni" id="nav3" onclick="goTab(3)"><i>🤖</i>IA</div>
+</div>
+
+<script>
+function goTab(n){
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  document.querySelectorAll('.ni').forEach((t,i)=>t.classList.toggle('active',i===n));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function brl(v){
+  if(isNaN(v)||v===null)return'—';
+  const a=Math.abs(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return(v<0?'-':'')+'R$ '+a;
+}
+function num(id){const e=document.getElementById(id);return e?(parseFloat(e.value)||0):0;}
+function sv(id,v){const e=document.getElementById(id);if(!e)return;if(e.tagName==='INPUT')e.value=v;else e.textContent=v;}
+function scl(id,v,cls){const e=document.getElementById(id);if(!e)return;if(e.tagName==='INPUT')e.value=v;else{e.textContent=v;if(cls)e.className=cls;}}
+function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+
+function calcular(){
+  const din=num('pg_din'),cred=num('pg_cred'),deb=num('pg_deb'),
+        pix=num('pg_pix'),vale=num('pg_vale'),
+        san=num('pg_sangria'),des=num('pg_despesa'),fiad=num('pg_fiado');
+  const sub=din+cred+deb+pix+vale+san+des;
+  const ab=num('b_abertura');
+  const tot=sub-ab;
+
+  sv('a_subtotal',brl(sub));
+
+  // Resumo pg1
+  sv('res_total',brl(tot));
+  sv('res_sub','Subtotal '+brl(sub)+' − Abertura '+brl(ab));
+  sv('res_din',brl(din));sv('res_cred',brl(cred));sv('res_deb',brl(deb));
+  sv('res_pix',brl(pix));sv('res_vale',brl(vale));sv('res_sangria',brl(san));
+  sv('res_despesa',brl(des));sv('res_subtotal',brl(sub));sv('res_abertura',brl(ab));sv('res_tcaixa',brl(tot));
+  const bx=document.getElementById('box-total');
+  if(bx){bx.className='tbox '+(tot>=0?'v':'r');const ve=document.getElementById('res_total');if(ve)ve.style.color=tot>=0?'var(--verde)':'var(--verm)';}
+
+  // ERP
+  const erp=num('b_erp'),dif=tot-erp;
+  sv('res_erp',erp>0?brl(erp):'—');
+  if(erp>0){const e=document.getElementById('res_dif');if(e){e.textContent=(dif>=0?'+':'')+brl(dif);e.className='v '+(Math.abs(dif)<0.02?'ok':'nok');}}
+  else sv('res_dif','—');
+
+  // Vendedores
+  const vl=[{id:'v_marcio',n:'Marcio'},{id:'v_diogo',n:'Diogo'},{id:'v_claudio',n:'Cláudio'},
+            {id:'v_rafael',n:'Rafael'},{id:'v_rodrigo',n:'Rodrigo'},
+            {id:'v_outro',n:document.getElementById('v_outro_nome')?.value||'Outro'}];
+  let vt=0; vl.forEach(v=>vt+=num(v.id));
+  const vtf=vt+fiad; sv('v_total_fiado',brl(vtf));
+  const conf=tot-vtf;
+  const ce=document.getElementById('res_conf');
+  if(ce){ce.textContent=(conf>=0?'+':'')+brl(conf);ce.className='v '+(Math.abs(conf)<0.02?'ok':'nok');}
+
+  // Ranking
+  const rv=document.getElementById('res_vendedores');
+  if(rv){
+    const s=vl.filter(v=>num(v.id)>0).map(v=>({n:v.n,val:num(v.id)})).sort((a,b)=>b.val-a.val);
+    if(!s.length){rv.innerHTML='<div class="ir" style="color:#aaa;font-size:13px">Nenhum lançado</div>';}
+    else{const mx=s[0].val;rv.innerHTML=s.map((v,i)=>`
+      <div class="ir"><span class="l">${i===0?'🥇':'  '} ${v.n}</span><span class="v">${brl(v.val)}</span></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar-fg" style="width:${(v.val/mx*100).toFixed(0)}%"></div></div></div>`).join('');}
+  }
+
+  // ERP linha a linha
+  [['din',din],['cred',cred],['deb',deb],['pix',pix],['vale',vale]].forEach(([k,p])=>{
+    sv('erp_'+k+'_p',brl(p));
+    const ev=num('e_'+k),st=document.getElementById('erp_'+k+'_st');
+    if(st) st.textContent=ev===0?'—':Math.abs(p-ev)<0.02?'✅':'⚠️';
+  });
+  sv('erp_tot_p',brl(sub));
+  const ts=document.getElementById('erp_tot_st');
+  if(ts&&erp>0) ts.textContent=Math.abs(dif)<0.02?'✅':'⚠️';
+
+  salvarAuto();
+}
+
+// ── Foto IA ──
+let vIA={};
+function lerFoto(inp){
+  if(!inp.files||!inp.files[0])return;
+  const f=inp.files[0],r=new FileReader();
+  r.onload=async(e)=>{
+    const b64=e.target.result.split(',')[1],mt=f.type||'image/jpeg';
+    const pv=document.getElementById('foto-preview');
+    pv.src=e.target.result;pv.style.display='block';
+    document.getElementById('ia-resultado').classList.remove('show');
+    document.getElementById('foto-loading').classList.add('show');
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+            {type:'text',text:`Foto de fechamento de caixa de loja de auto peças brasileira.
+Extraia valores numéricos. Responda APENAS JSON puro sem markdown:
+{"dinheiro":null,"credito":null,"debito":null,"pix":null,"vale_devolucao":null,"sangria":null,"despesa":null,"abertura":null,"fiado":null,"marcio":null,"diogo":null,"claudio":null,"rafael":null,"rodrigo":null,"erp_total":null,"data":null,"operador":null}
+null para não encontrados. Números com ponto decimal.`}
+          ]}]})
+      });
+      const d=await res.json();
+      const tx=d.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+      vIA=JSON.parse(tx);
+      const mp={dinheiro:'Dinheiro',credito:'Crédito',debito:'Débito',pix:'PIX',vale_devolucao:'Vale/Dev',
+                sangria:'Sangria',despesa:'Despesa',abertura:'Abertura',fiado:'Fiado',
+                marcio:'Marcio',diogo:'Diogo',claudio:'Cláudio',rafael:'Rafael',rodrigo:'Rodrigo',
+                erp_total:'Total ERP',data:'Data',operador:'Operador'};
+      document.getElementById('ia-lista').innerHTML=Object.entries(vIA)
+        .filter(([,v])=>v!==null&&v!==undefined)
+        .map(([k,v])=>`<div class="iai"><span class="k">${mp[k]||k}</span><span class="v">${typeof v==='number'?brl(v):v}</span></div>`)
+        .join('');
+      document.getElementById('ia-resultado').classList.add('show');
+    }catch(err){toast('❌ Erro ao analisar. Tente novamente.');}
+    finally{document.getElementById('foto-loading').classList.remove('show');}
+  };
+  r.readAsDataURL(f);
+}
+
+function aplicarValores(){
+  const mp={dinheiro:'pg_din',credito:'pg_cred',debito:'pg_deb',pix:'pg_pix',
+            vale_devolucao:'pg_vale',sangria:'pg_sangria',despesa:'pg_despesa',
+            abertura:'b_abertura',fiado:'pg_fiado',marcio:'v_marcio',diogo:'v_diogo',
+            claudio:'v_claudio',rafael:'v_rafael',rodrigo:'v_rodrigo',erp_total:'b_erp'};
+  Object.entries(vIA).forEach(([k,v])=>{
+    if(v===null||v===undefined)return;
+    const id=mp[k];if(id){const e=document.getElementById(id);if(e)e.value=v;}
+    if(k==='data'){const e=document.getElementById('data');if(e)e.value=v;}
+    if(k==='operador'){const e=document.getElementById('operador');if(e)e.value=v;}
+  });
+  calcular();toast('✅ Valores aplicados!');goTab(0);
+}
+
+// ── Resumo IA ──
+async function gerarResumo(){
+  const ld=document.getElementById('resumo-loading'),tx=document.getElementById('resumo-texto');
+  if(ld)ld.classList.add('show');if(tx)tx.textContent='';
+  const din=num('pg_din'),cred=num('pg_cred'),deb=num('pg_deb'),
+        pix=num('pg_pix'),vale=num('pg_vale'),san=num('pg_sangria'),des=num('pg_despesa'),fiad=num('pg_fiado');
+  const sub=din+cred+deb+pix+vale+san+des,ab=num('b_abertura'),tot=sub-ab,erp=num('b_erp');
+  const dif=erp>0?tot-erp:null;
+  const vt=['v_marcio','v_diogo','v_claudio','v_rafael','v_rodrigo','v_outro'].reduce((s,id)=>s+num(id),0);
+  const data=document.getElementById('data').value||'não informada';
+  const op=document.getElementById('operador').value||'não informado';
+  const obs=document.getElementById('obs').value||'';
+  const vends=[{n:'Marcio',v:num('v_marcio')},{n:'Diogo',v:num('v_diogo')},{n:'Cláudio',v:num('v_claudio')},
+               {n:'Rafael',v:num('v_rafael')},{n:'Rodrigo',v:num('v_rodrigo')}].filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+
+  const prompt=`Assistente de gestão da loja "Oseni Marcio e Marcelo Comercio de Auto Peças".
+Gere resumo executivo do fechamento em português, direto, para o dono via WhatsApp.
+DADOS: Data:${data} | Operador:${op} | Dinheiro:R$${din.toFixed(2)} | Crédito:R$${cred.toFixed(2)} | Débito:R$${deb.toFixed(2)} | PIX:R$${pix.toFixed(2)} | Vale:R$${vale.toFixed(2)} | Sangria:R$${san.toFixed(2)} | Despesa:R$${des.toFixed(2)} | Subtotal:R$${sub.toFixed(2)} | Abertura:R$${ab.toFixed(2)} | TOTAL:R$${tot.toFixed(2)} | ERP:${erp>0?'R$'+erp.toFixed(2):'—'} | Diferença:${dif!==null?(dif>=0?'+':'')+' R$'+Math.abs(dif).toFixed(2):'—'} | Fiado:R$${fiad.toFixed(2)} | Vendedores:${vends.map(v=>v.n+' R$'+v.v.toFixed(2)).join(', ')}${obs?' | Obs:'+obs:''}.
+Estrutura: resultado geral → meio de pagamento principal → ranking vendedores → conferência ERP → alertas se houver. Máximo 180 palavras. Formato WhatsApp com emojis.`;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const res=d.content.map(b=>b.text||'').join('').trim();
+    if(tx)tx.textContent=res;
+  }catch(e){if(tx)tx.textContent='Erro ao gerar resumo. Verifique a conexão.';}
+  finally{if(ld)ld.classList.remove('show');}
+}
+
+function compartilharWpp(){
+  const res=document.getElementById('resumo-texto')?.textContent||'';
+  if(!res||res.includes('Toque')||res.includes('Gerando')){toast('⚠️ Gere o resumo primeiro!');return;}
+  window.open('https://wa.me/?text='+encodeURIComponent(res),'_blank');
+}
+
+// ── Persistência ──
+function salvarAuto(){
+  try{
+    const d={};document.querySelectorAll('input,textarea').forEach(e=>{if(e.id)d[e.id]=e.value;});
+    const k='fm_'+(document.getElementById('data')?.value?.replace(/\//g,'')||'x');
+    localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('fm_last',k);
+  }catch(e){}
+}
+function salvarDados(){salvarAuto();toast('✅ Salvo!');}
+function limparTudo(){
+  if(!confirm('Limpar tudo?'))return;
+  document.querySelectorAll('input[type=number],input[type=text],textarea').forEach(e=>e.value='');
+  document.getElementById('resumo-texto').textContent='Toque em "Gerar Resumo" abaixo.';
+  document.getElementById('ia-resultado').classList.remove('show');
+  const pv=document.getElementById('foto-preview');pv.src='';pv.style.display='none';
+  calcular();toast('🗑️ Novo fechamento');
+}
+function restaurar(){
+  try{
+    const k=localStorage.getItem('fm_last');if(!k)return;
+    const hoje=new Date().toLocaleDateString('pt-BR').replace(/\//g,'');
+    if(!k.includes(hoje))return;
+    const d=JSON.parse(localStorage.getItem(k)||'{}');
+    Object.entries(d).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v;});
+    calcular();
+  }catch(e){}
+}
+window.addEventListener('load',()=>{restaurar();calcular();});
+</script>
+</body>
+</html>
