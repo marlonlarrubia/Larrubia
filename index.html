@@ -383,7 +383,12 @@ Responda APENAS JSON puro sem markdown:
 null para não encontrados. Números com ponto decimal.`}
           ]}]})
       });
+      if(!res.ok){
+        const errBody=await res.text();
+        throw new Error('HTTP '+res.status+': '+errBody.slice(0,200));
+      }
       const d=await res.json();
+      if(d.error) throw new Error(d.error.message||JSON.stringify(d.error));
       const tx=d.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
       vIA=JSON.parse(tx);
       const mp={dinheiro:'Dinheiro',credito:'Crédito',debito:'Débito',pix:'PIX',vale_devolucao:'Vale/Dev',
@@ -395,7 +400,7 @@ null para não encontrados. Números com ponto decimal.`}
         .map(([k,v])=>`<div class="iai"><span class="k">${mp[k]||k}</span><span class="v">${typeof v==='number'?brl(v):v}</span></div>`)
         .join('');
       document.getElementById('ia-resultado').classList.add('show');
-    }catch(err){toast('❌ Erro ao analisar. Tente novamente.');}
+    }catch(err){toast('❌ Erro: '+err.message);}
     finally{document.getElementById('foto-loading').classList.remove('show');}
   };
   r.readAsDataURL(f);
