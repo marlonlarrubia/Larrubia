@@ -359,8 +359,26 @@ function lerFoto(inp){
         body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
           messages:[{role:'user',content:[
             {type:'image',source:{type:'base64',media_type:mt,data:b64}},
-            {type:'text',text:`Foto de fechamento de caixa de loja de auto peças brasileira.
-Extraia valores numéricos. Responda APENAS JSON puro sem markdown:
+            {type:'text',text:`Esta é uma foto do fechamento de caixa da loja "Oseni Marcio e Marcelo Comercio de Auto Peças".
+
+O papel tem um CABEÇALHO RESUMIDO no topo e uma tabela de detalhes abaixo. Foque APENAS no cabeçalho, ignorando a tabela de pedidos.
+
+No cabeçalho procure:
+- "Notas" + "Moedas" somados → "dinheiro"
+- "Máster Card" / "Visa Crédito" / crédito em geral → "credito"
+- "Master Débito" / "Visa Déb" / "Elétron/Elo" / débito em geral → "debito"
+- "PIX" → "pix"
+- "Vale+Dev" / "Vale/Dev" / "Devolução" → "vale_devolucao"
+- "Sangria" → "sangria"
+- "Despesa" (some todos os itens de despesa) → "despesa"
+- "Abertura" → "abertura"
+- "Fiado" → "fiado"
+- Vendedores pelo nome: Marcio, Diogo, Cláudio, Rafael, Rodrigo → campos individuais
+- Data no topo → "data" formato dd/mm/aaaa
+
+Ignore completamente o Subtotal e Total (são calculados). Ignore a tabela de baixo com números de pedidos.
+
+Responda APENAS JSON puro sem markdown:
 {"dinheiro":null,"credito":null,"debito":null,"pix":null,"vale_devolucao":null,"sangria":null,"despesa":null,"abertura":null,"fiado":null,"marcio":null,"diogo":null,"claudio":null,"rafael":null,"rodrigo":null,"erp_total":null,"data":null,"operador":null}
 null para não encontrados. Números com ponto decimal.`}
           ]}]})
