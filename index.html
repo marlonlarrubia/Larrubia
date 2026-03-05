@@ -231,11 +231,11 @@ body{font-family:-apple-system,Arial,sans-serif;background:#eef2f7;font-size:15p
   <div class="card">
     <div class="ch" style="background:var(--roxo)">📸 Ler Papel por Foto</div>
     <label class="foto-area" for="foto-input">
-      <div style="font-size:48px">📄</div>
-      <p><strong>Toque para tirar foto</strong></p>
-      <p>ou escolher da galeria</p>
+      <div style="font-size:48px">📷</div>
+      <p><strong>Toque aqui para abrir a câmera</strong></p>
+      <p style="font-size:11px;color:#aaa">Safari pedirá permissão na primeira vez</p>
     </label>
-    <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="lerFoto(this)">
+    <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="lerFoto(this)">
     <img id="foto-preview" alt="">
     <div class="lbox" id="foto-loading" style="color:var(--roxo)">
       <div class="spin" style="border-top-color:var(--roxo)"></div>
