@@ -214,6 +214,12 @@ body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text
 <!-- ══ PAGE 1: RANKING ══ -->
 <div class="page" id="pg1">
   <div class="periodo-sel" id="ranking-periodos"></div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;align-items:center">
+    <span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Perfil:</span>
+    <button class="periodo-btn active" id="btn-Marcio"     onclick="setFiltro('Marcio')">Marcio (peças)</button>
+    <button class="periodo-btn"        id="btn-Diogo" onclick="setFiltro('Diogo')">Diogo</button>
+    <button class="periodo-btn"        id="btn-todos"   onclick="setFiltro('todos')">📋 Todos</button>
+  </div>
   <div class="card">
     <div class="card-header">Top produtos por venda <span id="rank-label">—</span></div>
     <div id="ranking-lista">
@@ -249,7 +255,35 @@ body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text
 // ══════════════════════════════
 // ESTADO
 // ══════════════════════════════
-let S = { periodos: [] };
+let S = { periodos: [], filtro: 'Marcio' };
+// filtro: 'Marcio' = só peças técnicas | 'todos' = tudo | 'Diogo' = só óleos/baterias/etc
+
+// Palavras-chave das categorias que o Diogo compra (excluídas do Marcionel do Marcio)
+const CATS_Diogo = [
+  // Óleos e lubrificantes
+  'OLEO','OL ','OL.','LUBRAX','BARDAHL','CASTROL','MOBIL','SHELL','IPIRANGA',
+  'SELENIA','MOTORCRAFT','URANIA','DRAGON','PROMAX','5W30','5W40','10W40',
+  '15W40','20W50','SAE','UNIGEROL','CAR 80','HIDRAULICO','LUBRIFICANTE',
+  // Baterias
+  'BATERIA','HELIAR','MOURA','JUPITER',
+  // Aditivos e fluidos
+  'ADITIVO','PARAFLU','RADIADOR','FLUIDO','DOT 4','DOT4','SILICONE',
+  // Lâmpadas
+  'LAMPADA','LÂMPADA','LED ','XENON','HALOGEN',
+  // Acessórios
+  'PALHETA','LIMPADOR','PARABRISA',
+];
+
+function isDiogo(nome) {
+  const n = nome.toUpperCase();
+  return CATS_Diogo.some(k => n.includes(k));
+}
+
+function filtrarProdutos(produtos) {
+  if (S.filtro === 'todos')   return produtos;
+  if (S.filtro === 'Diogo') return produtos.filter(p => isDiogo(p.nome));
+  return produtos.filter(p => !isDiogo(p.nome)); // 'Marcio' = default
+}
 // periodos = [ { label, inicio, fim, produtos: [{rank, nome, cod, ref, venda, custo, markup}] } ]
 
 let periodoAtivo = 0; // índice do período selecionado no ranking
@@ -260,6 +294,16 @@ function carregar() { try { const d = localStorage.getItem('giro_v1'); if(d) S =
 // ══════════════════════════════
 // NAVEGAÇÃO
 // ══════════════════════════════
+function setFiltro(f) {
+  S.filtro = f;
+  ['Marcio','Diogo','todos'].forEach(id => {
+    const btn = document.getElementById('btn-'+id);
+    if (btn) btn.classList.toggle('active', id === f);
+  });
+  renderRanking();
+  renderSugestoes();
+}
+
 function goTab(n) {
   document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i===n));
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
@@ -403,7 +447,8 @@ function renderKpisDados() {
   }
   document.getElementById('kpis-dados').style.display = 'block';
   const p = S.periodos[periodoAtivo];
-  const totalVenda = p.produtos.reduce((s,x) => s + x.venda, 0);
+  const produtosFiltrados = filtrarProdutos(p.produtos);
+  const totalVenda = produtosFiltrados.reduce((s,x) => s + x.venda, 0);
   const totalCusto = p.produtos.reduce((s,x) => s + x.custo, 0);
   const lucro = totalVenda - totalCusto;
   const markupMedio = totalCusto > 0 ? ((totalVenda - totalCusto) / totalCusto) : 0;
@@ -442,9 +487,11 @@ function renderRanking() {
 
   const p = S.periodos[periodoAtivo];
   label.textContent = p.label;
-  const maxVenda = p.produtos[0]?.venda || 1;
+  const produtos = filtrarProdutos(p.produtos);
+  const maxVenda = produtos[0]?.venda || 1;
 
-  lista.innerHTML = p.produtos.map((prod, i) => {
+  if (!produtos.length) { lista.innerHTML = '<div class="empty"><i>🔍</i><p>Nenhum produto nesta categoria.</p></div>'; return; }
+  lista.innerHTML = produtos.map((prod, i) => {
     const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const rankIcon  = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
     const barPct    = (prod.venda / maxVenda * 100).toFixed(1);
@@ -578,13 +625,14 @@ function renderSugestoes() {
   }
 
   const p = S.periodos[periodoAtivo];
-  const totalVenda = p.produtos.reduce((s,x) => s+x.venda, 0);
+  const produtosFiltrados = filtrarProdutos(p.produtos);
+  const totalVenda = produtosFiltrados.reduce((s,x) => s+x.venda, 0);
 
   // Calcula sugestão de quantidade semanal baseada no volume de vendas
   // Lógica: top 10 → alta prioridade, resto → média
   // Quantidade sugerida = proporcional ao % de venda no período
   // Assumindo estoque para ~2 semanas
-  const sugestoes = p.produtos.map(prod => {
+  const sugestoes = produtosFiltrados.map(prod => {
     const participacao = prod.venda / totalVenda;
     const prioridade   = prod.rank <= 5 ? 'alta' : prod.rank <= 15 ? 'média' : 'normal';
 
@@ -620,7 +668,8 @@ function renderSugestoes() {
 
   el.innerHTML = `
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.6">
-      📌 Sugestões baseadas no ranking de vendas do período <strong style="color:var(--text)">${p.label}</strong>. Ajuste as quantidades conforme seu estoque atual.
+      📌 Perfil: <strong style="color:var(--accent)">${S.filtro === 'marcio' ? 'Marcio — peças técnicas' : S.filtro === 'diogo' ? 'Diogo — óleos/baterias' : '📋 Todos os produtos'}</strong><br>
+      Baseado no período <strong style="color:var(--text)">${p.label}</strong>. Ajuste as quantidades conforme seu estoque atual. <strong style="color:var(--text)">${p.label}</strong>. Ajuste as quantidades conforme seu estoque atual.
     </div>
     ${renderGrupo(alta,   '🔴 Alta prioridade',   'var(--red)')}
     ${renderGrupo(media,  '🟡 Média prioridade',  'var(--accent)')}
