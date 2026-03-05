@@ -354,7 +354,7 @@ function lerFoto(inp){
     document.getElementById('ia-resultado').classList.remove('show');
     document.getElementById('foto-loading').classList.add('show');
     try{
-      const res=await fetch('https://api.anthropic.com/v1/messages',{
+      const res=await fetch('https://corsproxy.io/?url=https://api.anthropic.com/v1/messages',{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
           messages:[{role:'user',content:[
@@ -441,7 +441,7 @@ DADOS: Data:${data} | Operador:${op} | Dinheiro:R$${din.toFixed(2)} | Crédito:R
 Estrutura: resultado geral → meio de pagamento principal → ranking vendedores → conferência ERP → alertas se houver. Máximo 180 palavras. Formato WhatsApp com emojis.`;
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch('https://corsproxy.io/?url=https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     const res=d.content.map(b=>b.text||'').join('').trim();
