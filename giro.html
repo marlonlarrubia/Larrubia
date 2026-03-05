@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Giro de Produtos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg:     #0f1117;
+  --bg2:    #181c27;
+  --bg3:    #1e2333;
+  --border: #2a2f45;
+  --accent: #f5a623;
+  --green:  #2ecc71;
+  --red:    #e74c3c;
+  --blue:   #4a9eff;
+  --purple: #9b59b6;
+  --text:   #e8eaf0;
+  --muted:  #6b7280;
+  --r:      14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; padding-bottom: 88px; }
+
+/* Header */
+.header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 16px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+.header h1 span { color: var(--accent); }
+.header p { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+/* Tabs */
+.tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 63px; z-index: 99; }
+.tab { flex: 1; text-align: center; padding: 10px 4px; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; user-select: none; transition: color .2s; }
+.tab i { display: block; font-size: 19px; margin-bottom: 2px; font-style: normal; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Pages */
+.page { display: none; padding: 14px; }
+.page.active { display: block; }
+
+/* Upload */
+.upload-area {
+  border: 2px dashed var(--border); border-radius: var(--r);
+  padding: 32px 20px; text-align: center; cursor: pointer;
+  background: var(--bg2); transition: border-color .2s, background .2s;
+  margin-bottom: 12px;
+}
+.upload-area:hover, .upload-area.drag { border-color: var(--accent); background: var(--bg3); }
+.upload-area i { font-size: 44px; font-style: normal; display: block; margin-bottom: 10px; }
+.upload-area h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.upload-area p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* KPI cards */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.kpi { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; }
+.kpi .label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.kpi .valor { font-size: 22px; font-weight: 800; margin: 6px 0 2px; font-family: 'DM Mono', monospace; }
+.kpi .sub   { font-size: 11px; color: var(--muted); }
+.kpi.accent { border-color: var(--accent); }
+.kpi.green  { border-color: var(--green); }
+.kpi.blue   { border-color: var(--blue); }
+.kpi.purple { border-color: var(--purple); }
+.kpi.accent .valor { color: var(--accent); }
+.kpi.green  .valor { color: var(--green); }
+.kpi.blue   .valor { color: var(--blue); }
+.kpi.purple .valor { color: var(--purple); }
+
+/* Card */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 12px; overflow: hidden; }
+.card-header { padding: 11px 14px; font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.card-header span { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+/* Produto row */
+.prod-row {
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.prod-row:last-child { border-bottom: none; }
+.rank { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); min-width: 28px; text-align: center; flex-shrink: 0; }
+.rank.gold   { color: #f5a623; font-weight: 700; }
+.rank.silver { color: #aaa; font-weight: 700; }
+.rank.bronze { color: #cd7f32; font-weight: 700; }
+.prod-info { flex: 1; min-width: 0; }
+.prod-nome { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-cod  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+.prod-val  { text-align: right; flex-shrink: 0; }
+.prod-val .venda { font-size: 13px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--accent); }
+.prod-val .markup { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.prod-val .markup.good { color: var(--green); }
+.prod-val .markup.bad  { color: var(--red); }
+
+/* Barra de progresso */
+.bar-wrap { padding: 4px 14px 10px; }
+.bar-bg { height: 4px; background: var(--bg3); border-radius: 4px; }
+.bar-fg { height: 100%; border-radius: 4px; transition: width .6s ease; }
+
+/* Comparativo */
+.comp-row {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.comp-row:last-child { border-bottom: none; }
+.comp-nome { flex: 1; font-size: 13px; font-weight: 600; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.comp-bars { display: flex; flex-direction: column; gap: 3px; min-width: 120px; }
+.comp-bar-row { display: flex; align-items: center; gap: 6px; font-size: 10px; font-family: 'DM Mono', monospace; }
+.comp-bar-row .periodo { color: var(--muted); min-width: 12px; }
+.comp-bar-bg { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; }
+.comp-bar-fg { height: 100%; border-radius: 3px; }
+
+/* Sugestão de compra */
+.sug-row {
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.sug-row:last-child { border-bottom: none; }
+.sug-info { flex: 1; min-width: 0; }
+.sug-nome { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sug-cod  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+.sug-badge {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 10px;
+  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700;
+  color: var(--accent); white-space: nowrap; flex-shrink: 0;
+}
+.sug-motivo { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* Período selector */
+.periodo-sel { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.periodo-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 600; font-family: 'Sora', sans-serif; color: var(--muted); cursor: pointer; transition: all .15s; }
+.periodo-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+/* Upload múltiplo */
+.upload-list { margin-bottom: 12px; }
+.upload-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.upload-item .ui-info { flex: 1; }
+.upload-item .ui-nome { font-size: 13px; font-weight: 700; }
+.upload-item .ui-periodo { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+.upload-item .ui-status { font-size: 20px; }
+.upload-item .ui-del { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+
+/* Btn */
+.btn { border: none; border-radius: 10px; padding: 13px 18px; font-size: 14px; font-weight: 700; font-family: 'Sora', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform .1s; -webkit-appearance: none; }
+.btn:active { transform: scale(.97); }
+.btn-accent { background: var(--accent); color: #000; }
+.btn-ghost  { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+.btn-green  { background: var(--green); color: #000; }
+.btn-block  { width: 100%; margin-bottom: 10px; }
+.btn-sm     { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+
+/* Empty */
+.empty { text-align: center; padding: 36px 16px; color: var(--muted); }
+.empty i { font-size: 42px; font-style: normal; display: block; margin-bottom: 10px; }
+.empty p { font-size: 13px; line-height: 1.6; }
+
+/* Toast */
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 999; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Nav */
+.nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--border); display: flex; padding: 6px 0 10px; z-index: 100; }
+.ni { flex: 1; text-align: center; cursor: pointer; padding: 4px 0; color: var(--muted); font-size: 10px; font-weight: 600; user-select: none; transition: color .2s; }
+.ni i { display: block; font-size: 21px; line-height: 1; margin-bottom: 2px; font-style: normal; }
+.ni.active { color: var(--accent); }
+
+.section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); padding: 6px 0 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 Giro de <span>Produtos</span></h1>
+  <p id="header-periodo">Nenhum período carregado</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="goTab(0)"><i>📁</i>Dados</div>
+  <div class="tab" onclick="goTab(1)"><i>🏆</i>Ranking</div>
+  <div class="tab" onclick="goTab(2)"><i>📈</i>Comparar</div>
+  <div class="tab" onclick="goTab(3)"><i>🛒</i>Comprar</div>
+</div>
+
+<!-- ══ PAGE 0: DADOS / UPLOAD ══ -->
+<div class="page active" id="pg0">
+
+  <div class="section-label">Períodos carregados</div>
+  <div class="upload-list" id="upload-list">
+    <div class="empty" style="padding:20px"><i>📂</i><p>Nenhum arquivo carregado ainda.</p></div>
+  </div>
+
+  <label class="upload-area" id="upload-area" for="file-input">
+    <i>📄</i>
+    <h3>Importar relatório do ERP</h3>
+    <p>Toque aqui para selecionar o arquivo<br><strong>RankingDeVendasPorItem</strong> exportado do OneWay<br><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">.xlsx ou .xls</span></p>
+  </label>
+  <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="importarArquivo(this)">
+
+  <div id="kpis-dados" style="display:none">
+    <div class="section-label" style="margin-top:8px">Resumo do período atual</div>
+    <div class="kpi-grid">
+      <div class="kpi accent"><div class="label">Total Vendas</div><div class="valor" id="kpi-venda">—</div><div class="sub">período selecionado</div></div>
+      <div class="kpi green"><div class="label">Lucro Bruto</div><div class="valor" id="kpi-lucro">—</div><div class="sub">venda − custo</div></div>
+      <div class="kpi blue"><div class="label">Markup Médio</div><div class="valor" id="kpi-markup">—</div><div class="sub">média ponderada</div></div>
+      <div class="kpi purple"><div class="label">Produtos</div><div class="valor" id="kpi-prods">—</div><div class="sub">no ranking</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ PAGE 1: RANKING ══ -->
+<div class="page" id="pg1">
+  <div class="periodo-sel" id="ranking-periodos"></div>
+  <div class="card">
+    <div class="card-header">Top produtos por venda <span id="rank-label">—</span></div>
+    <div id="ranking-lista">
+      <div class="empty"><i>📊</i><p>Importe um relatório na aba Dados.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 2: COMPARAR ══ -->
+<div class="page" id="pg2">
+  <div id="comp-container">
+    <div class="empty"><i>📈</i><p>Importe ao menos 2 períodos<br>para comparar na aba Dados.</p></div>
+  </div>
+</div>
+
+<!-- ══ PAGE 3: SUGESTÃO DE COMPRA ══ -->
+<div class="page" id="pg3">
+  <div id="sug-container">
+    <div class="empty"><i>🛒</i><p>Importe um relatório na aba Dados<br>para ver sugestões de compra.</p></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="nav">
+  <div class="ni active" id="nav0" onclick="goTab(0)"><i>📁</i>Dados</div>
+  <div class="ni" id="nav1" onclick="goTab(1)"><i>🏆</i>Ranking</div>
+  <div class="ni" id="nav2" onclick="goTab(2)"><i>📈</i>Comparar</div>
+  <div class="ni" id="nav3" onclick="goTab(3)"><i>🛒</i>Comprar</div>
+</div>
+
+<script>
+// ══════════════════════════════
+// ESTADO
+// ══════════════════════════════
+let S = { periodos: [] };
+// periodos = [ { label, inicio, fim, produtos: [{rank, nome, cod, ref, venda, custo, markup}] } ]
+
+let periodoAtivo = 0; // índice do período selecionado no ranking
+
+function salvar() { try { localStorage.setItem('giro_v1', JSON.stringify(S)); } catch(e){} }
+function carregar() { try { const d = localStorage.getItem('giro_v1'); if(d) S = {...S, ...JSON.parse(d)}; } catch(e){} }
+
+// ══════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════
+function goTab(n) {
+  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  document.querySelectorAll('.ni').forEach((t,i) => t.classList.toggle('active', i===n));
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (n===1) renderRanking();
+  if (n===2) renderComparar();
+  if (n===3) renderSugestoes();
+}
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ══════════════════════════════
+// IMPORTAR ARQUIVO
+// ══════════════════════════════
+function importarArquivo(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+      // Extrai período do nome da aba (ex: RankingDeVendasPorItem_20250901)
+      const sheetName = wb.SheetNames[0];
+      const match = sheetName.match(/(\d{8})/);
+      const nomePeriodo = extrairPeriodoDaNome(file.name);
+
+      // Processa linhas (pula header e total)
+      const produtos = [];
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row[0] || typeof row[0] !== 'string') continue;
+        // Ignora linha de total
+        if (row[0].toString().startsWith('Total')) continue;
+
+        // Extrai rank e nome do campo "00001-( 02,356%) P-NOME DO PRODUTO"
+        const itemStr = row[0].toString().trim();
+        const rankMatch = itemStr.match(/^(\d+)/);
+        const rank = rankMatch ? parseInt(rankMatch[1]) : i;
+        // Remove o prefixo "00001-( 02,356%) P-" para ter só o nome limpo
+        const nomeClean = itemStr.replace(/^\d+-\([^)]+\)\s*P?-?\s*/i, '').trim();
+
+        const cod    = row[1] !== null && row[1] !== undefined ? String(row[1]).trim() : '—';
+        const venda  = parseFloat(row[3]) || 0;
+        const custo  = parseFloat(row[4]) || 0;
+        const markup = parseFloat(row[5]) || 0;
+
+        if (venda > 0) {
+          produtos.push({ rank, nome: nomeClean, cod, venda, custo, markup });
+        }
+      }
+
+      if (!produtos.length) { toast('⚠️ Nenhum produto encontrado no arquivo'); return; }
+
+      // Verifica se período já existe (substitui se sim)
+      const existeIdx = S.periodos.findIndex(p => p.label === nomePeriodo);
+      const periodo = { label: nomePeriodo, arquivo: file.name, produtos };
+
+      if (existeIdx >= 0) {
+        S.periodos[existeIdx] = periodo;
+        toast(`🔄 Período ${nomePeriodo} atualizado`);
+      } else {
+        S.periodos.push(periodo);
+        toast(`✅ ${produtos.length} produtos importados`);
+      }
+
+      // Ordena períodos cronologicamente
+      S.periodos.sort((a, b) => a.label.localeCompare(b.label));
+      periodoAtivo = S.periodos.length - 1;
+
+      salvar();
+      renderUploadList();
+      renderKpisDados();
+      atualizarHeader();
+      input.value = '';
+
+    } catch(err) {
+      toast('❌ Erro ao ler arquivo: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function extrairPeriodoDaNome(filename) {
+  // Tenta extrair datas do nome do arquivo
+  // Ex: aaaRankingDeVendasPorItem_20250901_20260228.xlsx
+  const matches = filename.match(/(\d{8})/g);
+  if (matches && matches.length >= 2) {
+    const fmt = (d) => `${d.slice(6,8)}/${d.slice(4,6)}/${d.slice(0,4)}`;
+    return `${fmt(matches[0])} – ${fmt(matches[1])}`;
+  } else if (matches && matches.length === 1) {
+    const fmt = (d) => `${d.slice(6,8)}/${d.slice(4,6)}/${d.slice(0,4)}`;
+    return `a partir de ${fmt(matches[0])}`;
+  }
+  return filename.replace(/\.(xlsx?)/i, '').replace(/^aaa/,'');
+}
+
+function removerPeriodo(idx) {
+  if (!confirm(`Remover período "${S.periodos[idx].label}"?`)) return;
+  S.periodos.splice(idx, 1);
+  periodoAtivo = Math.max(0, S.periodos.length - 1);
+  salvar();
+  renderUploadList();
+  renderKpisDados();
+  atualizarHeader();
+  toast('🗑️ Período removido');
+}
+
+// ══════════════════════════════
+// RENDER: UPLOAD LIST
+// ══════════════════════════════
+function renderUploadList() {
+  const el = document.getElementById('upload-list');
+  if (!S.periodos.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><i>📂</i><p>Nenhum arquivo carregado ainda.</p></div>';
+    return;
+  }
+  el.innerHTML = S.periodos.map((p, i) => `
+    <div class="upload-item">
+      <div class="ui-status">📊</div>
+      <div class="ui-info">
+        <div class="ui-nome">${p.label}</div>
+        <div class="ui-periodo">${p.produtos.length} produtos · ${p.arquivo}</div>
+      </div>
+      <button class="ui-del" onclick="removerPeriodo(${i})">✕</button>
+    </div>`).join('');
+}
+
+function renderKpisDados() {
+  if (!S.periodos.length) {
+    document.getElementById('kpis-dados').style.display = 'none';
+    return;
+  }
+  document.getElementById('kpis-dados').style.display = 'block';
+  const p = S.periodos[periodoAtivo];
+  const totalVenda = p.produtos.reduce((s,x) => s + x.venda, 0);
+  const totalCusto = p.produtos.reduce((s,x) => s + x.custo, 0);
+  const lucro = totalVenda - totalCusto;
+  const markupMedio = totalCusto > 0 ? ((totalVenda - totalCusto) / totalCusto) : 0;
+
+  document.getElementById('kpi-venda').textContent  = brl(totalVenda);
+  document.getElementById('kpi-lucro').textContent  = brl(lucro);
+  document.getElementById('kpi-markup').textContent = pct(markupMedio);
+  document.getElementById('kpi-prods').textContent  = p.produtos.length;
+}
+
+function atualizarHeader() {
+  const el = document.getElementById('header-periodo');
+  if (!S.periodos.length) { el.textContent = 'Nenhum período carregado'; return; }
+  const p = S.periodos[periodoAtivo];
+  el.textContent = p.label;
+}
+
+// ══════════════════════════════
+// RENDER: RANKING
+// ══════════════════════════════
+function renderRanking() {
+  const periSel = document.getElementById('ranking-periodos');
+  const lista   = document.getElementById('ranking-lista');
+  const label   = document.getElementById('rank-label');
+
+  if (!S.periodos.length) {
+    periSel.innerHTML = '';
+    lista.innerHTML = '<div class="empty"><i>📊</i><p>Importe um relatório na aba Dados.</p></div>';
+    return;
+  }
+
+  // Seletores de período
+  periSel.innerHTML = S.periodos.map((p,i) => `
+    <button class="periodo-btn ${i===periodoAtivo?'active':''}" onclick="selecionarPeriodo(${i})">${p.label}</button>`
+  ).join('');
+
+  const p = S.periodos[periodoAtivo];
+  label.textContent = p.label;
+  const maxVenda = p.produtos[0]?.venda || 1;
+
+  lista.innerHTML = p.produtos.map((prod, i) => {
+    const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const rankIcon  = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+    const barPct    = (prod.venda / maxVenda * 100).toFixed(1);
+    const barColor  = i < 3 ? 'var(--accent)' : i < 10 ? 'var(--blue)' : 'var(--border)';
+    const mkClass   = prod.markup > 0.4 ? 'good' : prod.markup < 0.1 ? 'bad' : '';
+
+    return `
+      <div class="prod-row">
+        <div class="rank ${rankClass}">${rankIcon}</div>
+        <div class="prod-info">
+          <div class="prod-nome">${prod.nome}</div>
+          <div class="prod-cod">${prod.cod}</div>
+        </div>
+        <div class="prod-val">
+          <div class="venda">${brl(prod.venda)}</div>
+          <div class="markup ${mkClass}">${pct(prod.markup)} markup</div>
+        </div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-bg"><div class="bar-fg" style="width:${barPct}%;background:${barColor}"></div></div>
+      </div>`;
+  }).join('');
+}
+
+function selecionarPeriodo(idx) {
+  periodoAtivo = idx;
+  atualizarHeader();
+  renderKpisDados();
+  renderRanking();
+}
+
+// ══════════════════════════════
+// RENDER: COMPARAR
+// ══════════════════════════════
+function renderComparar() {
+  const el = document.getElementById('comp-container');
+
+  if (S.periodos.length < 2) {
+    el.innerHTML = '<div class="empty"><i>📈</i><p>Importe ao menos 2 períodos<br>para comparar.</p></div>';
+    return;
+  }
+
+  // Pega os 2 últimos períodos
+  const p1 = S.periodos[S.periodos.length - 2];
+  const p2 = S.periodos[S.periodos.length - 1];
+
+  // Encontra produtos em comum
+  const mapa1 = {};
+  p1.produtos.forEach(p => mapa1[p.cod] = p);
+
+  const comparados = p2.produtos
+    .filter(p => mapa1[p.cod])
+    .map(p => ({
+      nome: p.nome, cod: p.cod,
+      v1: mapa1[p.cod].venda, v2: p.venda,
+      delta: p.venda - mapa1[p.cod].venda,
+      deltaPct: mapa1[p.cod].venda > 0 ? (p.venda - mapa1[p.cod].venda) / mapa1[p.cod].venda : 0
+    }))
+    .sort((a,b) => b.v2 - a.v2);
+
+  const max = Math.max(...comparados.map(c => Math.max(c.v1, c.v2)), 1);
+
+  // KPIs comparativos
+  const tv1 = p1.produtos.reduce((s,x) => s+x.venda, 0);
+  const tv2 = p2.produtos.reduce((s,x) => s+x.venda, 0);
+  const deltaTot = tv2 - tv1;
+  const deltaTotPct = tv1 > 0 ? deltaTot/tv1 : 0;
+  const sinal = deltaTot >= 0 ? '+' : '';
+  const cor   = deltaTot >= 0 ? 'var(--green)' : 'var(--red)';
+
+  el.innerHTML = `
+    <div class="kpi-grid" style="margin-bottom:14px">
+      <div class="kpi" style="border-color:var(--blue)">
+        <div class="label">${p1.label}</div>
+        <div class="valor" style="color:var(--blue);font-size:18px">${brl(tv1)}</div>
+        <div class="sub">período anterior</div>
+      </div>
+      <div class="kpi accent">
+        <div class="label">${p2.label}</div>
+        <div class="valor" style="font-size:18px">${brl(tv2)}</div>
+        <div class="sub">período atual</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header">Variação total <span style="color:${cor}">${sinal}${pct(deltaTotPct)}</span></div>
+      <div style="padding:14px;text-align:center">
+        <div style="font-size:24px;font-weight:800;color:${cor};font-family:'DM Mono',monospace">${sinal}${brl(Math.abs(deltaTot))}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">${p1.label} → ${p2.label}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Produto a produto <span>${comparados.length} em comum</span></div>
+      ${comparados.map(c => {
+        const b1pct = (c.v1/max*100).toFixed(1);
+        const b2pct = (c.v2/max*100).toFixed(1);
+        const dc = c.delta >= 0 ? 'var(--green)' : 'var(--red)';
+        const ds = c.delta >= 0 ? '+' : '';
+        return `
+        <div class="comp-row">
+          <div class="comp-nome">
+            <div style="font-size:13px;font-weight:700">${c.nome}</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${c.cod}</div>
+          </div>
+          <div class="comp-bars">
+            <div class="comp-bar-row">
+              <span class="periodo" style="color:var(--blue)">A</span>
+              <div class="comp-bar-bg"><div class="comp-bar-fg" style="width:${b1pct}%;background:var(--blue)"></div></div>
+              <span style="color:var(--blue);min-width:60px;text-align:right">${brl(c.v1)}</span>
+            </div>
+            <div class="comp-bar-row">
+              <span class="periodo" style="color:var(--accent)">B</span>
+              <div class="comp-bar-bg"><div class="comp-bar-fg" style="width:${b2pct}%;background:var(--accent)"></div></div>
+              <span style="color:var(--accent);min-width:60px;text-align:right">${brl(c.v2)}</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding:2px 14px 8px;text-align:right;font-size:11px;font-family:'DM Mono',monospace;color:${dc}">${ds}${brl(c.delta)} (${ds}${pct(c.deltaPct)})</div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════
+// RENDER: SUGESTÕES DE COMPRA
+// ══════════════════════════════
+function renderSugestoes() {
+  const el = document.getElementById('sug-container');
+
+  if (!S.periodos.length) {
+    el.innerHTML = '<div class="empty"><i>🛒</i><p>Importe um relatório na aba Dados<br>para ver sugestões de compra.</p></div>';
+    return;
+  }
+
+  const p = S.periodos[periodoAtivo];
+  const totalVenda = p.produtos.reduce((s,x) => s+x.venda, 0);
+
+  // Calcula sugestão de quantidade semanal baseada no volume de vendas
+  // Lógica: top 10 → alta prioridade, resto → média
+  // Quantidade sugerida = proporcional ao % de venda no período
+  // Assumindo estoque para ~2 semanas
+  const sugestoes = p.produtos.map(prod => {
+    const participacao = prod.venda / totalVenda;
+    const prioridade   = prod.rank <= 5 ? 'alta' : prod.rank <= 15 ? 'média' : 'normal';
+
+    // Sugestão baseada no giro: mais vendido = mais unidades sugeridas
+    // Escala simples: top 5 = 5+ unidades, top 15 = 3+, resto = 1-2
+    let qtdSug;
+    if (prod.rank <= 3)       qtdSug = 10;
+    else if (prod.rank <= 5)  qtdSug = 7;
+    else if (prod.rank <= 10) qtdSug = 5;
+    else if (prod.rank <= 20) qtdSug = 3;
+    else                      qtdSug = 2;
+
+    return { ...prod, participacao, prioridade, qtdSug };
+  });
+
+  const alta   = sugestoes.filter(s => s.prioridade === 'alta');
+  const media  = sugestoes.filter(s => s.prioridade === 'média');
+  const normal = sugestoes.filter(s => s.prioridade === 'normal');
+
+  const renderGrupo = (lista, titulo, cor) => `
+    <div class="card">
+      <div class="card-header" style="border-left:3px solid ${cor};padding-left:11px">${titulo} <span>${lista.length} itens</span></div>
+      ${lista.map(s => `
+        <div class="sug-row">
+          <div class="sug-info">
+            <div class="sug-nome">${s.nome}</div>
+            <div class="sug-cod">${s.cod} · ${pct(s.participacao)} do faturamento</div>
+            <div class="sug-motivo">Rank #${s.rank} · Venda: ${brl(s.venda)} · Markup: ${pct(s.markup)}</div>
+          </div>
+          <div class="sug-badge">${s.qtdSug}x</div>
+        </div>`).join('')}
+    </div>`;
+
+  el.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.6">
+      📌 Sugestões baseadas no ranking de vendas do período <strong style="color:var(--text)">${p.label}</strong>. Ajuste as quantidades conforme seu estoque atual.
+    </div>
+    ${renderGrupo(alta,   '🔴 Alta prioridade',   'var(--red)')}
+    ${renderGrupo(media,  '🟡 Média prioridade',  'var(--accent)')}
+    ${renderGrupo(normal, '🟢 Reposição normal',  'var(--green)')}`;
+}
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+function brl(v) {
+  if (isNaN(v)) return '—';
+  return 'R$ ' + Math.abs(v).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function pct(v) {
+  if (isNaN(v)) return '—';
+  return (v * 100).toFixed(1) + '%';
+}
+
+// ══════════════════════════════
+// DRAG & DROP no desktop
+// ══════════════════════════════
+const ua = document.getElementById('upload-area');
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag'); });
+ua.addEventListener('dragleave', () => ua.classList.remove('drag'));
+ua.addEventListener('drop', e => {
+  e.preventDefault(); ua.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('file-input').files = dt.files; importarArquivo(document.getElementById('file-input')); }
+});
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+carregar();
+periodoAtivo = Math.max(0, S.periodos.length - 1);
+renderUploadList();
+renderKpisDados();
+atualizarHeader();
+</script>
+</body>
+</html>
