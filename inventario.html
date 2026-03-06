@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Inventário — Auto Peças</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg:     #0f1117;
+  --bg2:    #181c27;
+  --bg3:    #1e2333;
+  --border: #2a2f45;
+  --accent: #f5a623;
+  --green:  #2ecc71;
+  --red:    #e74c3c;
+  --yellow: #f39c12;
+  --blue:   #4a9eff;
+  --text:   #e8eaf0;
+  --muted:  #6b7280;
+  --r:      14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; padding-bottom: 88px; }
+
+.header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 16px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 17px; font-weight: 800; }
+.header h1 span { color: var(--accent); }
+.header p { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+.tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 63px; z-index: 99; }
+.tab { flex: 1; text-align: center; padding: 10px 4px; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; user-select: none; }
+.tab i { display: block; font-size: 19px; margin-bottom: 2px; font-style: normal; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.page { display: none; padding: 14px; }
+.page.active { display: block; }
+
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 12px; overflow: hidden; }
+.card-header { padding: 11px 14px; font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.card-header span { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+/* Upload */
+.upload-area { border: 2px dashed var(--border); border-radius: var(--r); padding: 28px 20px; text-align: center; cursor: pointer; background: var(--bg2); transition: border-color .2s; margin-bottom: 12px; }
+.upload-area:hover { border-color: var(--accent); }
+.upload-area i { font-size: 40px; font-style: normal; display: block; margin-bottom: 10px; }
+.upload-area h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.upload-area p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* Progress */
+.progress-wrap { background: var(--bg3); border-radius: 8px; height: 8px; margin: 10px 0; overflow: hidden; }
+.progress-bar { height: 100%; background: var(--accent); border-radius: 8px; transition: width .3s; }
+
+/* KPIs */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.kpi { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 13px; }
+.kpi .label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.kpi .valor { font-size: 22px; font-weight: 800; margin: 5px 0 2px; font-family: 'DM Mono', monospace; }
+.kpi .sub { font-size: 11px; color: var(--muted); }
+.kpi.ok     { border-color: var(--green);  } .kpi.ok .valor  { color: var(--green); }
+.kpi.nok    { border-color: var(--red);    } .kpi.nok .valor { color: var(--red); }
+.kpi.warn   { border-color: var(--yellow); } .kpi.warn .valor{ color: var(--yellow); }
+.kpi.accent { border-color: var(--accent); } .kpi.accent .valor { color: var(--accent); }
+
+/* Contagem */
+.count-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 12px; }
+.count-box h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 12px; }
+.search-input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 15px; font-family: 'DM Mono', monospace; outline: none; -webkit-appearance: none; margin-bottom: 10px; text-transform: uppercase; }
+.search-input:focus { border-color: var(--accent); }
+.search-result { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; display: none; }
+.search-result.show { display: block; }
+.sr-nome { font-size: 14px; font-weight: 700; }
+.sr-cod  { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); margin-top: 2px; }
+.sr-erp  { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.qty-big { display: flex; align-items: center; justify-content: center; gap: 0; margin: 12px 0 10px; }
+.qty-big button { background: var(--bg2); border: 1.5px solid var(--border); color: var(--accent); font-size: 28px; font-weight: 700; width: 52px; height: 52px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.qty-big button:first-child { border-radius: 10px 0 0 10px; }
+.qty-big button:last-child  { border-radius: 0 10px 10px 0; }
+.qty-big input { width: 90px; height: 52px; text-align: center; border: 1.5px solid var(--border); border-left: none; border-right: none; background: var(--bg3); color: var(--text); font-size: 24px; font-weight: 800; font-family: 'DM Mono', monospace; outline: none; -webkit-appearance: none; }
+
+/* Item rows */
+.item-row { padding: 11px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.item-row:last-child { border-bottom: none; }
+.item-cod  { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); min-width: 90px; flex-shrink: 0; }
+.item-info { flex: 1; min-width: 0; }
+.item-desc { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.dif-badge { border-radius: 8px; padding: 4px 9px; font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; white-space: nowrap; flex-shrink: 0; }
+.dif-ok   { background: #1a3d2a; color: var(--green);  border: 1px solid var(--green); }
+.dif-pos  { background: #2a1a3d; color: var(--blue);   border: 1px solid var(--blue); }
+.dif-neg  { background: #3d1a1a; color: var(--red);    border: 1px solid var(--red); }
+.dif-pend { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+/* Filtros */
+.filtros { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.fbtn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: 'Sora', sans-serif; }
+.fbtn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+.btn { border: none; border-radius: 10px; padding: 13px 18px; font-size: 14px; font-weight: 700; font-family: 'Sora', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform .1s; -webkit-appearance: none; }
+.btn:active { transform: scale(.97); }
+.btn-accent { background: var(--accent); color: #000; }
+.btn-green  { background: var(--green);  color: #000; }
+.btn-ghost  { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+.btn-block  { width: 100%; margin-bottom: 10px; }
+.btn-sm     { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+
+.empty { text-align: center; padding: 36px 16px; color: var(--muted); }
+.empty i { font-size: 42px; font-style: normal; display: block; margin-bottom: 10px; }
+.empty p { font-size: 13px; line-height: 1.6; }
+
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 999; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--border); display: flex; padding: 6px 0 10px; z-index: 100; }
+.ni { flex: 1; text-align: center; cursor: pointer; padding: 4px 0; color: var(--muted); font-size: 10px; font-weight: 600; user-select: none; }
+.ni i { display: block; font-size: 21px; line-height: 1; margin-bottom: 2px; font-style: normal; }
+.ni.active { color: var(--accent); }
+
+.info-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.info-box strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📦 <span>Inventário</span> Físico</h1>
+  <p id="header-status">Nenhum estoque carregado</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="goTab(0)"><i>📁</i>Importar</div>
+  <div class="tab" onclick="goTab(1)"><i>🔢</i>Contar</div>
+  <div class="tab" onclick="goTab(2)"><i>⚖️</i>Divergências</div>
+  <div class="tab" onclick="goTab(3)"><i>📊</i>Relatório</div>
+</div>
+
+<!-- ══ PAGE 0: IMPORTAR ══ -->
+<div class="page active" id="pg0">
+  <div class="info-box">
+    📌 Exporte o <strong>Relatório de Posição Física e Financeira de Estoque</strong> do OneWay em PDF e importe aqui. O app extrai os saldos automaticamente.
+  </div>
+
+  <label class="upload-area" for="pdf-input">
+    <i>📄</i>
+    <h3>Importar PDF do Estoque</h3>
+    <p>Toque para selecionar o arquivo<br><strong>INVENTARIOESTOQUE</strong> exportado do OneWay<br><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">.pdf</span></p>
+  </label>
+  <input type="file" id="pdf-input" accept=".pdf" style="display:none" onchange="importarPDF(this)">
+
+  <div id="progress-container" style="display:none">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px" id="progress-label">Lendo PDF...</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+  </div>
+
+  <div id="kpis-import" style="display:none">
+    <div class="kpi-grid">
+      <div class="kpi accent"><div class="label">Itens no ERP</div><div class="valor" id="ki-total">—</div><div class="sub">saldos importados</div></div>
+      <div class="kpi warn"><div class="label">Já contados</div><div class="valor" id="ki-contados">—</div><div class="sub">desta sessão</div></div>
+    </div>
+    <button class="btn btn-ghost btn-block" onclick="confirmarLimpar()">🔄 Reimportar novo PDF</button>
+  </div>
+</div>
+
+<!-- ══ PAGE 1: CONTAR ══ -->
+<div class="page" id="pg1">
+  <div class="count-box">
+    <h3>🔢 Digite o código do produto</h3>
+    <input class="search-input" type="text" id="busca-cod" placeholder="Ex: 0280150698" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="buscarProduto()">
+
+    <div class="search-result" id="search-result">
+      <div class="sr-nome" id="sr-desc">—</div>
+      <div class="sr-cod"  id="sr-cod">—</div>
+      <div class="sr-erp"  id="sr-erp">Saldo ERP: — unidades</div>
+      <div class="qty-big">
+        <button onclick="ajustarQty(-1)">−</button>
+        <input type="number" id="qty-fisica" value="0" min="0" inputmode="numeric">
+        <button onclick="ajustarQty(+1)">+</button>
+      </div>
+      <button class="btn btn-green btn-block" onclick="confirmarContagem()">✅ Confirmar contagem</button>
+    </div>
+
+    <div id="nao-encontrado" style="display:none;text-align:center;padding:16px;color:var(--muted);font-size:13px">
+      ⚠️ Código não encontrado no estoque ERP
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Últimas contagens <span id="contagem-count">0</span></div>
+    <div id="ultimas-contagens">
+      <div class="empty" style="padding:24px"><i>🔢</i><p>Nenhuma contagem ainda.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 2: DIVERGÊNCIAS ══ -->
+<div class="page" id="pg2">
+  <div class="filtros">
+    <button class="fbtn active" id="f-todas"  onclick="setFiltro('todas')">Todas</button>
+    <button class="fbtn"        id="f-neg"    onclick="setFiltro('neg')">⬇️ Faltando</button>
+    <button class="fbtn"        id="f-pos"    onclick="setFiltro('pos')">⬆️ Sobrando</button>
+    <button class="fbtn"        id="f-ok"     onclick="setFiltro('ok')">✅ Correto</button>
+  </div>
+  <div class="card">
+    <div class="card-header">Itens contados <span id="div-count">0</span></div>
+    <div id="div-lista">
+      <div class="empty"><i>⚖️</i><p>Faça a contagem na aba Contar.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE 3: RELATÓRIO ══ -->
+<div class="page" id="pg3">
+  <div id="relatorio-container">
+    <div class="empty"><i>📊</i><p>Faça ao menos uma contagem<br>para gerar o relatório.</p></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="nav">
+  <div class="ni active" id="nav0" onclick="goTab(0)"><i>📁</i>Importar</div>
+  <div class="ni"        id="nav1" onclick="goTab(1)"><i>🔢</i>Contar</div>
+  <div class="ni"        id="nav2" onclick="goTab(2)"><i>⚖️</i>Divergências</div>
+  <div class="ni"        id="nav3" onclick="goTab(3)"><i>📊</i>Relatório</div>
+</div>
+
+<script>
+// pdf.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ══════════════════════════════
+// ESTADO
+// ══════════════════════════════
+let S = {
+  itens: {},      // { cod: { cod, desc, erp, ref } }
+  contagens: {},  // { cod: { fisica, timestamp } }
+  filtro: 'todas'
+};
+
+let itemBuscado = null;
+
+function salvar() { try { localStorage.setItem('inv_v1', JSON.stringify({contagens: S.contagens})); } catch(e){} }
+function carregar() {
+  try {
+    const d = localStorage.getItem('inv_v1');
+    if (d) { const p = JSON.parse(d); S.contagens = p.contagens || {}; }
+  } catch(e) {}
+}
+// Itens são muito grandes para localStorage — ficam só em memória
+// mas contagens são persistidas
+
+// ══════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════
+function goTab(n) {
+  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  document.querySelectorAll('.ni').forEach((t,i)  => t.classList.toggle('active', i===n));
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (n===2) renderDivergencias();
+  if (n===3) renderRelatorio();
+}
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ══════════════════════════════
+// IMPORTAR PDF
+// ══════════════════════════════
+async function importarPDF(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+
+  document.getElementById('progress-container').style.display = 'block';
+  document.getElementById('kpis-import').style.display = 'none';
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const totalPages = pdf.numPages;
+
+    S.itens = {};
+    let itensEncontrados = 0;
+
+    for (let p = 1; p <= totalPages; p++) {
+      // Update progress
+      const pct = Math.round(p / totalPages * 100);
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-label').textContent = `Lendo página ${p} de ${totalPages}... (${itensEncontrados} itens)`;
+
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      const lines = groupTextIntoLines(content.items);
+
+      for (const line of lines) {
+        const item = parseLine(line);
+        if (item) {
+          S.itens[item.cod] = item;
+          itensEncontrados++;
+        }
+      }
+
+      // Yield to UI every 10 pages
+      if (p % 10 === 0) await sleep(0);
+    }
+
+    document.getElementById('progress-container').style.display = 'none';
+    document.getElementById('kpis-import').style.display = 'block';
+    atualizarKpisImport();
+    atualizarHeader();
+    toast(`✅ ${itensEncontrados} itens importados!`);
+
+  } catch(err) {
+    document.getElementById('progress-container').style.display = 'none';
+    toast('❌ Erro ao ler PDF: ' + err.message);
+  }
+  input.value = '';
+}
+
+function groupTextIntoLines(items) {
+  // Group text items by Y position (same line = within 3px)
+  const byY = {};
+  for (const item of items) {
+    const y = Math.round(item.transform[5]);
+    if (!byY[y]) byY[y] = [];
+    byY[y].push({ text: item.str, x: item.transform[4] });
+  }
+  return Object.values(byY)
+    .map(group => group.sort((a,b) => a.x - b.x).map(g => g.text).join(' ').trim())
+    .filter(l => l.length > 3);
+}
+
+function parseLine(line) {
+  // Skip header/footer lines
+  const skip = ['OSENIR','RELATÓRIO','FILIAL','VENDAS','Código','Fabricante','Página','DEPÓSITO','FICHA'];
+  if (skip.some(s => line.includes(s))) return null;
+
+  const parts = line.trim().split(/\s+/);
+  if (parts.length < 4) return null;
+
+  const cod = parts[0];
+  // Code must start with alphanumeric, at least 3 chars, no pure text
+  if (!/^[A-Z0-9]{3,}/.test(cod)) return null;
+  if (/^(PC|UN|JG|KT|MT|ML|LT|CX|PR|RL|GL|GR|KG|PT)$/.test(cod)) return null;
+
+  // Extract numbers from line
+  const nums = [];
+  const descParts = [];
+  for (let i = 1; i < parts.length; i++) {
+    const clean = parts[i].replace(/\./g,'').replace(',','.');
+    const n = parseFloat(clean);
+    if (!isNaN(n) && /^[\d.,]+$/.test(parts[i])) {
+      nums.push(n);
+    } else if (!/^(PC|UN|JG|KT|MT|ML|LT|CX|PR|RL|GL|GR|KG|PT)$/.test(parts[i])) {
+      descParts.push(parts[i]);
+    }
+  }
+
+  if (nums.length < 2) return null;
+
+  // QME = first number, Estoque = second number
+  const qme    = nums[0];
+  const estoque = nums[1];
+
+  // Estoque must be reasonable (0-9999)
+  if (estoque < 0 || estoque > 9999) return null;
+  // Description must have some content
+  const desc = descParts.join(' ').trim();
+  if (!desc) return null;
+
+  return { cod, desc, erp: estoque, qme };
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function confirmarLimpar() {
+  if (!confirm('Isso vai remover o estoque importado. As contagens feitas serão mantidas.\n\nContinuar?')) return;
+  S.itens = {};
+  document.getElementById('kpis-import').style.display = 'none';
+  atualizarHeader();
+}
+
+function atualizarKpisImport() {
+  document.getElementById('ki-total').textContent = Object.keys(S.itens).length.toLocaleString('pt-BR');
+  document.getElementById('ki-contados').textContent = Object.keys(S.contagens).length.toLocaleString('pt-BR');
+}
+
+function atualizarHeader() {
+  const el = document.getElementById('header-status');
+  const ni = Object.keys(S.itens).length;
+  const nc = Object.keys(S.contagens).length;
+  if (!ni) { el.textContent = 'Nenhum estoque carregado'; return; }
+  el.textContent = `${ni.toLocaleString('pt-BR')} itens no ERP · ${nc} contados`;
+}
+
+// ══════════════════════════════
+// CONTAGEM
+// ══════════════════════════════
+function buscarProduto() {
+  const cod = document.getElementById('busca-cod').value.trim().toUpperCase();
+  const sr  = document.getElementById('search-result');
+  const nf  = document.getElementById('nao-encontrado');
+  sr.classList.remove('show'); nf.style.display = 'none';
+  itemBuscado = null;
+
+  if (cod.length < 3) return;
+
+  // Exact match first, then prefix
+  let item = S.itens[cod];
+  if (!item) {
+    const match = Object.values(S.itens).find(i => i.cod.startsWith(cod));
+    if (match) item = match;
+  }
+
+  if (!item) {
+    if (Object.keys(S.itens).length > 0) nf.style.display = 'block';
+    return;
+  }
+
+  itemBuscado = item;
+  document.getElementById('sr-desc').textContent = item.desc;
+  document.getElementById('sr-cod').textContent  = item.cod;
+  document.getElementById('sr-erp').textContent  = `Saldo ERP: ${item.erp} unidade(s)`;
+
+  // Pre-fill with existing contagem if available
+  const prev = S.contagens[item.cod];
+  document.getElementById('qty-fisica').value = prev ? prev.fisica : item.erp;
+
+  sr.classList.add('show');
+}
+
+function ajustarQty(delta) {
+  const inp = document.getElementById('qty-fisica');
+  inp.value = Math.max(0, (parseInt(inp.value) || 0) + delta);
+}
+
+function confirmarContagem() {
+  if (!itemBuscado) return;
+  const fisica = parseInt(document.getElementById('qty-fisica').value) || 0;
+
+  S.contagens[itemBuscado.cod] = {
+    fisica,
+    desc: itemBuscado.desc,
+    erp: itemBuscado.erp,
+    timestamp: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+  };
+
+  salvar();
+  toast(`✅ ${itemBuscado.cod} — ${fisica} unidade(s) registradas`);
+
+  // Limpa busca
+  document.getElementById('busca-cod').value = '';
+  document.getElementById('search-result').classList.remove('show');
+  document.getElementById('nao-encontrado').style.display = 'none';
+  itemBuscado = null;
+
+  atualizarKpisImport();
+  atualizarHeader();
+  renderUltimasContagens();
+  document.getElementById('busca-cod').focus();
+}
+
+function renderUltimasContagens() {
+  const el = document.getElementById('contagem-count');
+  const lista = document.getElementById('ultimas-contagens');
+  const total = Object.keys(S.contagens).length;
+  el.textContent = total;
+
+  if (!total) {
+    lista.innerHTML = '<div class="empty" style="padding:24px"><i>🔢</i><p>Nenhuma contagem ainda.</p></div>';
+    return;
+  }
+
+  // Mostra as 20 mais recentes
+  const recentes = Object.entries(S.contagens)
+    .sort((a,b) => b[1].timestamp?.localeCompare(a[1].timestamp||'') || 0)
+    .slice(0, 20);
+
+  lista.innerHTML = recentes.map(([cod, c]) => {
+    const dif = c.fisica - c.erp;
+    const cls = dif === 0 ? 'dif-ok' : dif > 0 ? 'dif-pos' : 'dif-neg';
+    const txt = dif === 0 ? '✓ OK' : (dif > 0 ? '+' : '') + dif;
+    return `
+      <div class="item-row">
+        <div class="item-cod">${cod}</div>
+        <div class="item-info">
+          <div class="item-desc">${c.desc}</div>
+          <div class="item-sub">ERP: ${c.erp} · Físico: ${c.fisica} · ${c.timestamp||''}</div>
+        </div>
+        <div class="dif-badge ${cls}">${txt}</div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+// DIVERGÊNCIAS
+// ══════════════════════════════
+function setFiltro(f) {
+  S.filtro = f;
+  ['todas','neg','pos','ok'].forEach(id => {
+    document.getElementById('f-'+id)?.classList.toggle('active', id===f);
+  });
+  renderDivergencias();
+}
+
+function renderDivergencias() {
+  const el = document.getElementById('div-lista');
+  const ct = document.getElementById('div-count');
+  const contagens = Object.entries(S.contagens);
+
+  if (!contagens.length) {
+    el.innerHTML = '<div class="empty"><i>⚖️</i><p>Faça a contagem na aba Contar.</p></div>';
+    ct.textContent = '0';
+    return;
+  }
+
+  let lista = contagens.map(([cod, c]) => ({ cod, ...c, dif: c.fisica - c.erp }));
+
+  if (S.filtro === 'neg')  lista = lista.filter(i => i.dif < 0);
+  if (S.filtro === 'pos')  lista = lista.filter(i => i.dif > 0);
+  if (S.filtro === 'ok')   lista = lista.filter(i => i.dif === 0);
+
+  lista.sort((a,b) => Math.abs(b.dif) - Math.abs(a.dif));
+  ct.textContent = lista.length;
+
+  if (!lista.length) {
+    el.innerHTML = '<div class="empty" style="padding:24px"><i>🔍</i><p>Nenhum item neste filtro.</p></div>';
+    return;
+  }
+
+  el.innerHTML = lista.map(i => {
+    const cls = i.dif === 0 ? 'dif-ok' : i.dif > 0 ? 'dif-pos' : 'dif-neg';
+    const txt = i.dif === 0 ? '✓ OK' : (i.dif > 0 ? '+' : '') + i.dif;
+    return `
+      <div class="item-row">
+        <div class="item-cod">${i.cod}</div>
+        <div class="item-info">
+          <div class="item-desc">${i.desc}</div>
+          <div class="item-sub">ERP: ${i.erp} → Físico: ${i.fisica}</div>
+        </div>
+        <div class="dif-badge ${cls}">${txt}</div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+// RELATÓRIO
+// ══════════════════════════════
+function renderRelatorio() {
+  const el = document.getElementById('relatorio-container');
+  const contagens = Object.values(S.contagens);
+  if (!contagens.length) {
+    el.innerHTML = '<div class="empty"><i>📊</i><p>Faça ao menos uma contagem<br>para gerar o relatório.</p></div>';
+    return;
+  }
+
+  const ok   = contagens.filter(c => c.fisica === c.erp);
+  const neg  = contagens.filter(c => c.fisica < c.erp);
+  const pos  = contagens.filter(c => c.fisica > c.erp);
+  const pctOk = (ok.length / contagens.length * 100).toFixed(0);
+
+  // Maiores divergências negativas (faltando no físico)
+  const topNeg = contagens.filter(c => c.fisica < c.erp)
+    .sort((a,b) => (a.fisica-a.erp) - (b.fisica-b.erp))
+    .slice(0, 10);
+
+  const topPos = contagens.filter(c => c.fisica > c.erp)
+    .sort((a,b) => (b.fisica-b.erp) - (a.fisica-a.erp))
+    .slice(0, 5);
+
+  el.innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi accent"><div class="label">Contados</div><div class="valor">${contagens.length}</div><div class="sub">itens verificados</div></div>
+      <div class="kpi ${pctOk >= 80 ? 'ok' : 'warn'}"><div class="label">Acurácia</div><div class="valor">${pctOk}%</div><div class="sub">${ok.length} corretos</div></div>
+      <div class="kpi nok"><div class="label">⬇️ Faltando</div><div class="valor">${neg.length}</div><div class="sub">físico < ERP</div></div>
+      <div class="kpi" style="border-color:var(--blue)"><div class="label" >⬆️ Sobrando</div><div class="valor" style="color:var(--blue)">${pos.length}</div><div class="sub">físico > ERP</div></div>
+    </div>
+
+    ${topNeg.length ? `
+    <div class="card">
+      <div class="card-header">⬇️ Maiores faltas (físico menor que ERP) <span>${topNeg.length}</span></div>
+      ${topNeg.map(i => `
+        <div class="item-row">
+          <div class="item-cod">${i.cod||'—'}</div>
+          <div class="item-info">
+            <div class="item-desc">${i.desc}</div>
+            <div class="item-sub">ERP: ${i.erp} → Físico: ${i.fisica}</div>
+          </div>
+          <div class="dif-badge dif-neg">${i.fisica - i.erp}</div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    ${topPos.length ? `
+    <div class="card">
+      <div class="card-header">⬆️ Maiores sobras (físico maior que ERP) <span>${topPos.length}</span></div>
+      ${topPos.map(i => `
+        <div class="item-row">
+          <div class="item-cod">${i.cod||'—'}</div>
+          <div class="item-info">
+            <div class="item-desc">${i.desc}</div>
+            <div class="item-sub">ERP: ${i.erp} → Físico: ${i.fisica}</div>
+          </div>
+          <div class="dif-badge dif-pos">+${i.fisica - i.erp}</div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <button class="btn btn-accent btn-block" onclick="exportarCSV()">⬇️ Exportar divergências (.csv)</button>
+    <button class="btn btn-ghost btn-block" onclick="if(confirm('Zerar todas as contagens?')){S.contagens={};salvar();renderRelatorio();renderDivergencias();renderUltimasContagens();atualizarHeader();toast('🗑️ Contagens zeradas');}">🗑️ Zerar contagens</button>`;
+}
+
+function exportarCSV() {
+  const contagens = Object.values(S.contagens).filter(c => c.fisica !== c.erp);
+  if (!contagens.length) { toast('Nenhuma divergência para exportar'); return; }
+
+  const header = 'Código,Descrição,ERP,Físico,Diferença\n';
+  const rows = contagens
+    .sort((a,b) => (a.fisica-a.erp) - (b.fisica-b.erp))
+    .map(c => `${c.cod||''},${c.desc},"${c.erp}","${c.fisica}","${c.fisica-c.erp}"`)
+    .join('\n');
+
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `divergencias_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('✅ CSV exportado!');
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+carregar();
+atualizarHeader();
+renderUltimasContagens();
+
+// Enter no campo de busca confirma
+document.getElementById('busca-cod').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (itemBuscado) document.getElementById('qty-fisica').focus();
+  }
+});
+document.getElementById('qty-fisica').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmarContagem();
+});
+</script>
+</body>
+</html>
