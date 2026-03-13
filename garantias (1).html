@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garantias — Autopeças</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F2EE;
+  --surface:#FFFFFF;
+  --surface2:#ECEAE5;
+  --border:#D4CFC6;
+  --border2:#BFB9AE;
+  --text:#1A1714;
+  --text2:#3D3830;
+  --muted:#7A7267;
+  --faint:#C8C2B8;
+  --accent:#1A1714;
+  --yellow:#B45309;--yellow-bg:#FEF3C7;--yellow-bd:#FCD34D;
+  --blue:#1D4ED8;  --blue-bg:#DBEAFE;  --blue-bd:#93C5FD;
+  --purple:#7C3AED;--purple-bg:#EDE9FE;--purple-bd:#C4B5FD;
+  --green:#166534; --green-bg:#DCFCE7; --green-bd:#86EFAC;
+  --red:#B91C1C;   --red-bg:#FEE2E2;   --red-bd:#FCA5A5;
+}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;min-height:100vh;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border2);}
+
+/* ── HEADER ── */
+#header{background:var(--text);padding:0 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;min-height:52px;}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.12em;color:#fff;text-transform:uppercase;white-space:nowrap;}
+.logo small{color:#888;font-size:10px;letter-spacing:.1em;margin-left:8px;font-weight:400;}
+nav{display:flex;align-items:center;gap:0;}
+.nav-btn{background:none;border:none;border-bottom:3px solid transparent;color:#9CA3AF;padding:14px 13px 11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;white-space:nowrap;transition:color .15s;}
+.nav-btn:hover{color:#E5E7EB;}
+.nav-btn.active{color:#fff;border-bottom-color:#fff;}
+.btn-add{background:#fff;color:var(--text);border:none;padding:9px 16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:12px;margin-left:12px;white-space:nowrap;transition:opacity .15s;}
+.btn-add:hover{opacity:.85;}
+
+/* mobile nav */
+#mobile-nav{display:none;background:var(--surface);border-top:1px solid var(--border);position:fixed;bottom:0;left:0;right:0;z-index:100;padding:0;}
+.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;background:none;border:none;border-top:3px solid transparent;color:var(--muted);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.mnav-btn.active{color:var(--text);border-top-color:var(--text);}
+.mnav-icon{font-size:18px;line-height:1;}
+
+/* ── MAIN ── */
+#main{padding:16px;max-width:1100px;margin:0 auto;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.card-title{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+
+/* ── BOTÕES ── */
+.btn-primary{background:var(--text);color:#fff;border:2px solid var(--text);padding:11px 22px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:13px;transition:opacity .15s;}
+.btn-primary:hover{opacity:.85;}
+.btn-ghost{background:none;border:2px solid var(--border2);color:var(--text2);padding:10px 20px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;transition:border-color .15s,color .15s;}
+.btn-ghost:hover{border-color:var(--text);color:var(--text);}
+.btn-danger{background:none;border:2px solid var(--red-bd);color:var(--red);padding:10px 16px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:600;transition:border-color .15s;}
+.btn-danger:hover{border-color:var(--red);}
+.btn-blue{background:var(--blue);color:#fff;border:2px solid var(--blue);padding:10px 18px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:12px;transition:opacity .15s;}
+.btn-blue:hover{opacity:.85;}
+.btn-green{background:var(--green);color:#fff;border:2px solid var(--green);padding:11px 22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:13px;transition:opacity .15s;}
+.btn-green:hover{opacity:.85;}
+.btn-sm{padding:7px 14px;font-size:12px;}
+
+/* ── CAMPOS ── */
+.field{margin-bottom:14px;}
+.field label{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px;font-family:'IBM Plex Mono',monospace;}
+.field input,.field select,.field textarea{background:var(--bg);border:2px solid var(--border);color:var(--text);padding:10px 12px;width:100%;outline:none;font-family:'IBM Plex Sans',sans-serif;font-size:14px;transition:border-color .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text);}
+.field textarea{resize:vertical;min-height:60px;}
+.field select option{background:#fff;color:var(--text);}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:3px 9px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid;border-radius:0;}
+.badge-pendente{border-color:var(--yellow-bd);color:var(--yellow);background:var(--yellow-bg);}
+.badge-solicitado{border-color:var(--blue-bd);color:var(--blue);background:var(--blue-bg);}
+.badge-documentando{border-color:var(--purple-bd);color:var(--purple);background:var(--purple-bg);}
+.badge-resolvido{border-color:var(--green-bd);color:var(--green);background:var(--green-bg);}
+.badge-aguardando{border-color:var(--yellow-bd);color:var(--yellow);background:var(--yellow-bg);}
+.badge-autorizado{border-color:var(--green-bd);color:var(--green);background:var(--green-bg);}
+.badge-negado{border-color:var(--red-bd);color:var(--red);background:var(--red-bg);}
+
+.urg-red{color:var(--red);font-family:'IBM Plex Mono',monospace;}
+.urg-yellow{color:var(--yellow);font-family:'IBM Plex Mono',monospace;}
+.urg-green{color:var(--green);font-family:'IBM Plex Mono',monospace;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);margin-bottom:14px;}
+.stat-box{background:var(--surface);padding:14px 12px;cursor:default;}
+.stat-box.clickable{cursor:pointer;}
+.stat-box.clickable:hover{background:var(--surface2);}
+.stat-label{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;}
+.stat-num{font-size:32px;font-weight:700;line-height:1;font-family:'IBM Plex Mono',monospace;}
+
+/* ── TABELA ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);}
+.t-header{display:grid;padding:8px 14px;border-bottom:2px solid var(--border);background:var(--surface2);}
+.t-header span{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+.t-row{display:grid;padding:11px 14px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .1s;}
+.t-row:hover{background:var(--surface2);}
+.t-desc{color:var(--text);font-weight:600;font-size:14px;}
+.t-sub{color:var(--muted);font-size:12px;margin-top:2px;}
+.t-ref{color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:12px;}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text2);}
+.chip-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.t-ver{color:var(--muted);font-size:12px;text-align:right;font-weight:600;}
+.dias-num{font-size:20px;font-weight:700;line-height:1;font-family:'IBM Plex Mono',monospace;}
+.empty-row{padding:32px 14px;color:var(--muted);text-align:center;font-style:italic;}
+
+/* ── FILTROS ── */
+.filters{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;}
+.filters select{background:var(--surface);border:2px solid var(--border);color:var(--text);padding:9px 12px;outline:none;font-family:'IBM Plex Sans',sans-serif;font-size:13px;cursor:pointer;font-weight:500;transition:border-color .15s;}
+.filters select:focus{border-color:var(--text);}
+.filter-count{color:var(--muted);font-size:12px;margin-left:auto;font-family:'IBM Plex Mono',monospace;}
+
+/* ── DETALHE ── */
+.detalhe-grid{display:grid;grid-template-columns:1fr 300px;gap:14px;}
+.det-title{font-size:20px;font-weight:700;letter-spacing:.02em;margin-bottom:3px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.info-item label{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:4px;font-family:'IBM Plex Mono',monospace;}
+.info-item span{color:var(--text);font-size:14px;font-weight:500;}
+.info-item.full{grid-column:span 2;}
+
+/* ── DOCS CHECKLIST ── */
+.doc-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.doc-item:last-child{border-bottom:none;}
+.doc-item:hover{background:var(--surface2);margin:0 -16px;padding:11px 16px;}
+.checkbox{width:18px;height:18px;border:2px solid var(--border2);background:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.checkbox.checked{border-color:var(--green);background:var(--green);}
+.checkbox.checked::after{content:'✓';color:#fff;font-size:11px;font-weight:700;}
+.doc-label{font-size:14px;font-weight:500;}
+.doc-label.done{color:var(--green);text-decoration:line-through;}
+.doc-label.pending{color:var(--text2);}
+.progress-bar{height:5px;background:var(--border);margin-top:14px;}
+.progress-fill{height:100%;background:var(--green);transition:width .3s;}
+.progress-text{color:var(--muted);font-size:12px;margin-top:5px;font-family:'IBM Plex Mono',monospace;}
+
+/* ── FLUXO ── */
+.fluxo-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.fluxo-dot{width:10px;height:10px;border:2px solid;flex-shrink:0;}
+.fluxo-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ── CATÁLOGOS ── */
+.catalog-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.cat-card{background:var(--surface);border:1px solid var(--border);padding:14px;}
+.cat-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.cat-title{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.cat-meta{margin-left:auto;color:var(--muted);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+.cat-item{color:var(--text2);font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);}
+.cat-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ── BARRAS FORNECEDOR ── */
+.forn-bar-item{margin-bottom:14px;}
+.forn-bar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.forn-bar-name{color:var(--text);font-size:13px;font-weight:600;}
+.bar-bg{height:4px;background:var(--border);}
+.bar-fill{height:100%;transition:width .4s;}
+
+/* ── RESULTADO ── */
+.resultado-ok{color:var(--green);padding:8px 0;font-size:14px;font-weight:600;}
+.resultado-form{display:flex;gap:8px;}
+.resultado-form input{background:var(--bg);border:2px solid var(--border);color:var(--text);padding:10px 12px;flex:1;outline:none;font-family:'IBM Plex Sans',sans-serif;font-size:14px;}
+.resultado-form input:focus{border-color:var(--text);}
+
+/* ── FORM ── */
+.nova-wrap{max-width:640px;}
+.nova-title{font-size:20px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:18px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-actions{display:flex;gap:10px;margin-top:8px;}
+
+/* ── SOLICITAÇÕES ── */
+.sol-card{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.sol-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px;}
+.sol-num{font-size:17px;font-weight:700;letter-spacing:.06em;font-family:'IBM Plex Mono',monospace;}
+.sol-meta{color:var(--muted);font-size:12px;margin-top:3px;}
+.sol-itens{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;}
+.sol-itens th{color:var(--muted);text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--surface2);font-family:'IBM Plex Mono',monospace;}
+.sol-itens td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text2);font-size:13px;}
+.sol-itens tr:last-child td{border-bottom:none;}
+.sol-itens tr:hover td{background:var(--surface2);}
+.sol-total{text-align:right;font-weight:700;color:var(--text);font-size:14px;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;}
+.sol-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.sol-ret{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px;padding-top:14px;border-top:2px solid var(--border);}
+.sol-ret-item label{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:5px;font-family:'IBM Plex Mono',monospace;}
+.sol-ret-item input{background:var(--bg);border:2px solid var(--border);color:var(--text);padding:9px 10px;width:100%;outline:none;font-family:'IBM Plex Sans',sans-serif;font-size:13px;}
+.sol-ret-item input:focus{border-color:var(--text);}
+
+/* ── TOAST & MODAL ── */
+#toast{position:fixed;bottom:80px;right:16px;background:var(--text);border:none;padding:12px 20px;font-size:13px;font-weight:600;color:#fff;opacity:0;pointer-events:none;z-index:999;transition:opacity .25s;}
+#toast.show{opacity:1;}
+#modal-overlay{position:fixed;inset:0;background:rgba(26,23,20,.6);z-index:200;display:none;align-items:center;justify-content:center;}
+#modal-overlay.show{display:flex;}
+#modal-box{background:var(--surface);border:2px solid var(--border);padding:28px;max-width:380px;width:90%;}
+#modal-title{font-size:17px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;}
+#modal-msg{color:var(--muted);font-size:13px;margin-bottom:22px;line-height:1.7;}
+#modal-actions{display:flex;gap:10px;}
+
+#pdf-preview{display:none;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:720px){
+  #header nav{display:none;}
+  #mobile-nav{display:flex;}
+  #main{padding:12px 12px 72px;}
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .detalhe-grid{grid-template-columns:1fr;}
+  .catalog-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .sol-ret{grid-template-columns:1fr 1fr;}
+  .stat-num{font-size:26px;}
+  .btn-primary,.btn-ghost,.btn-green{padding:12px 18px;font-size:14px;}
+  #toast{bottom:72px;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .sol-ret{grid-template-columns:1fr;}
+  .sol-itens{font-size:11px;}
+  .sol-itens th,.sol-itens td{padding:4px 5px;}
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo">Garantias <small>Autopeças</small></div>
+  <nav>
+    <button class="nav-btn active" id="nav-dashboard"    onclick="showView('dashboard')">Painel</button>
+    <button class="nav-btn"        id="nav-lista"         onclick="showView('lista')">Peças</button>
+    <button class="nav-btn"        id="nav-solicitacoes"  onclick="showView('solicitacoes')">Solicitações</button>
+    <button class="nav-btn"        id="nav-marcas"        onclick="showView('marcas')">Marcas</button>
+    <button class="nav-btn"        id="nav-fornecedores"  onclick="showView('fornecedores')">Fornecedores</button>
+    <button class="btn-add"                               onclick="showView('nova')">+ Nova Peça</button>
+  </nav>
+</div>
+
+<div id="mobile-nav">
+  <button class="mnav-btn active" id="mnav-dashboard"    onclick="showView('dashboard')"><span class="mnav-icon">📊</span>Painel</button>
+  <button class="mnav-btn"        id="mnav-lista"         onclick="showView('lista')"><span class="mnav-icon">🔧</span>Peças</button>
+  <button class="mnav-btn"        id="mnav-solicitacoes"  onclick="showView('solicitacoes')"><span class="mnav-icon">📄</span>Solicit.</button>
+  <button class="mnav-btn"        id="mnav-marcas"        onclick="showView('marcas')"><span class="mnav-icon">🏷</span>Marcas</button>
+  <button class="mnav-btn"        id="mnav-fornecedores"  onclick="showView('fornecedores')"><span class="mnav-icon">🏭</span>Fornec.</button>
+</div>
+
+<div id="main"></div>
+<div id="toast"></div>
+
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div id="modal-title">Confirmar</div>
+    <div id="modal-msg"></div>
+    <div id="modal-actions">
+      <button class="btn-primary" onclick="modalOk()">Confirmar</button>
+      <button class="btn-ghost"   onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="pdf-preview"></div>
+
+<script>
+// ── EMPRESA (editável) ────────────────────────────────────────────────────────
+var EMPRESA = { nome: 'Oseni Marcio e Marcelo Com de Auto Peças LTDA', cnpj: '16.480.798/0001-56' };
+
+// ── DADOS PADRÃO ─────────────────────────────────────────────────────────────
+var MARCAS_PAD = [
+  {id:1,nome:'Bosch', cor:'#E05555',docs:['NF de devolução','Laudo técnico','Formulário Bosch']},
+  {id:2,nome:'Denso', cor:'#60A5FA',docs:['NF de devolução','Foto da peça','RMA preenchido']},
+  {id:3,nome:'NGK',   cor:'#FB923C',docs:['NF de devolução','Código do defeito']},
+  {id:4,nome:'Monroe',cor:'#4ADE80',docs:['NF de devolução','Laudo técnico','Formulário Monroe']},
+  {id:5,nome:'Mahle', cor:'#C084FC',docs:['NF de devolução','Relatório de defeito']}
+];
+var FORN_PAD = [
+  {id:1,nome:'COMDIP'},
+  {id:2,nome:'FURACAO - FW DISTRIBUIDORA LTDA'},
+  {id:3,nome:'Distribuidora Alfa'}
+];
+
+function load(k,def){try{var v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+var marcas        = load('gf_marcas2', MARCAS_PAD);
+var fornecedores  = load('gf_forns2',  FORN_PAD);
+var pecas         = load('gf_pecas5',  null);
+var solicitacoes  = load('gf_sols',    []);
+var currentView   = 'dashboard';
+var currentPeca   = null;
+var filtroStatus  = 'todos';
+var filtroMarca   = 'todos';
+var filtroForn    = 'todos';
+var modalCb       = null;
+
+if(!pecas){
+  var hj=new Date();
+  function da(n){var d=new Date(hj);d.setDate(d.getDate()-n);return d.toISOString().split('T')[0];}
+  pecas=[
+    {id:1,descricao:"Bomba d'água",         referencia:'BW-0451',   marcaId:1,fornecedorId:1,dataEntrada:da(47),status:'pendente',    motivo:'Vazamento após 3 meses',  docsOk:[],resultado:'',solId:null},
+    {id:2,descricao:'Vela de ignição',       referencia:'BKR6E-11', marcaId:3,fornecedorId:1,dataEntrada:da(31),status:'pendente',    motivo:'Queimada prematuramente',  docsOk:[],resultado:'',solId:null},
+    {id:3,descricao:'Amortecedor dianteiro', referencia:'G8040',    marcaId:4,fornecedorId:2,dataEntrada:da(18),status:'documentando',motivo:'Barulho anormal',          docsOk:['NF de devolução'],resultado:'',solId:null},
+    {id:4,descricao:'Sensor lambda',         referencia:'234-4209', marcaId:2,fornecedorId:3,dataEntrada:da(12),status:'enviado',     motivo:'Leitura errada',           docsOk:['NF de devolução','Foto da peça','RMA preenchido'],resultado:'',solId:null},
+    {id:5,descricao:'Filtro de óleo',        referencia:'OX-68D',   marcaId:5,fornecedorId:2,dataEntrada:da(5), status:'resolvido',  motivo:'Defeito de fabricação',    docsOk:['NF de devolução','Relatório de defeito'],resultado:'Crédito: R$ 87,00',solId:null}
+  ];
+  save('gf_pecas5',pecas);
+}
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function dias(d){return Math.floor((Date.now()-new Date(d).getTime())/86400000);}
+function urgC(d){return d>=30?'urg-red':d>=14?'urg-yellow':'urg-green';}
+function urgColor(d){return d>=30?'#B91C1C':d>=14?'#B45309':'#166534';}
+function fmtD(d){return d?d.split('-').reverse().join('/'):'—';}
+function today(){return new Date().toISOString().split('T')[0];}
+function genId(){return Date.now()+Math.floor(Math.random()*9999);}
+function getMarca(id){for(var i=0;i<marcas.length;i++){if(marcas[i].id===id)return marcas[i];}return null;}
+function getForn(id){for(var i=0;i<fornecedores.length;i++){if(fornecedores[i].id===id)return fornecedores[i];}return null;}
+function getSol(id){for(var i=0;i<solicitacoes.length;i++){if(solicitacoes[i].id===id)return solicitacoes[i];}return null;}
+function fmtMoney(v){return'R$ '+parseFloat(v||0).toFixed(2).replace('.',',');}
+function badge(s){
+  var L={pendente:'Pendente',solicitado:'Solicitado',documentando:'Documentando',resolvido:'Resolvido'};
+  return '<span class="badge badge-'+s+'">'+(L[s]||s)+'</span>';
+}
+function badgeSol(s){
+  var L={aguardando:'Aguardando',autorizado:'Autorizado',negado:'Negado'};
+  return '<span class="badge badge-'+s+'">'+(L[s]||s)+'</span>';
+}
+function chipMarca(m){
+  if(!m)return '<span style="color:var(--muted)">—</span>';
+  return '<span class="chip"><span class="chip-dot" style="background:'+m.cor+'"></span>'+m.nome+'</span>';
+}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.className='show';setTimeout(function(){t.className='';},2500);}
+function showConfirm(title,msg,cb){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-msg').textContent=msg;
+  modalCb=cb;
+  document.getElementById('modal-overlay').className='show';
+}
+function modalOk(){if(modalCb)modalCb();closeModal();}
+function closeModal(){document.getElementById('modal-overlay').className='';modalCb=null;}
+
+function showView(v,id){
+  currentView=v;
+  if(id!==undefined)currentPeca=id;
+  ['dashboard','lista','solicitacoes','marcas','fornecedores'].forEach(function(n){
+    var el=document.getElementById('nav-'+n);
+    if(el)el.className='nav-btn'+(n===v?' active':'');
+    var mel=document.getElementById('mnav-'+n);
+    if(mel)mel.className='mnav-btn'+(n===v?' active':'');
+  });
+  render();
+  window.scrollTo(0,0);
+}
+
+function render(){
+  var m=document.getElementById('main');
+  if     (currentView==='dashboard')   m.innerHTML=renderDashboard();
+  else if(currentView==='lista')       m.innerHTML=renderLista();
+  else if(currentView==='detalhe')     m.innerHTML=renderDetalhe();
+  else if(currentView==='nova')        m.innerHTML=renderNova();
+  else if(currentView==='marcas')      m.innerHTML=renderMarcas();
+  else if(currentView==='fornecedores')m.innerHTML=renderFornecedores();
+  else if(currentView==='solicitacoes')m.innerHTML=renderSolicitacoes();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  var total=pecas.length,pend=0,solic=0,docum=0,criticos=0;
+  for(var i=0;i<pecas.length;i++){
+    var p=pecas[i];
+    if(p.status==='pendente')pend++;
+    if(p.status==='solicitado')solic++;
+    if(p.status==='documentando')docum++;
+    if(p.status!=='resolvido'&&dias(p.dataEntrada)>=30)criticos++;
+  }
+  var solPend=solicitacoes.filter(function(s){return s.statusSol==='aguardando';}).length;
+
+  var porForn=[];
+  for(var fi=0;fi<fornecedores.length;fi++){
+    var f=fornecedores[fi];
+    var items=pecas.filter(function(p){return p.fornecedorId===f.id&&p.status==='pendente';});
+    if(!items.length)continue;
+    var maxD=0;for(var ii=0;ii<items.length;ii++){var dd=dias(items[ii].dataEntrada);if(dd>maxD)maxD=dd;}
+    porForn.push({nome:f.nome,count:items.length,max:maxD});
+  }
+  porForn.sort(function(a,b){return b.max-a.max;});
+
+  var antigas=pecas.filter(function(p){return p.status==='pendente';});
+  antigas.sort(function(a,b){return dias(b.dataEntrada)-dias(a.dataEntrada);});
+  antigas=antigas.slice(0,5);
+
+  var sh=[
+    ['Total',total,'var(--text)'],['Pendentes',pend,'var(--yellow)'],
+    ['Solicitados',solic,'var(--blue)'],['Documentando',docum,'var(--purple)'],['Críticos +30d',criticos,'var(--red)']
+  ].map(function(s){return '<div class="stat-box"><div class="stat-label">'+s[0]+'</div><div class="stat-num" style="color:'+s[2]+'">'+s[1]+'</div></div>';}).join('');
+
+  var solBox='<div class="stat-box clickable" onclick="showView(\'solicitacoes\')">'
+    +'<div class="stat-label">Aguardando ↗</div>'
+    +'<div class="stat-num" style="color:var(--yellow)">'+solPend+'</div></div>';
+
+  var fh=porForn.length===0?'<div style="color:var(--muted);font-style:italic">Nenhuma peça pendente.</div>':porForn.map(function(f){
+    var pct=Math.min(f.max/60*100,100);
+    return '<div class="forn-bar-item"><div class="forn-bar-row">'
+      +'<div class="forn-bar-name">'+f.nome+'</div>'
+      +'<div style="display:flex;gap:10px"><span style="color:var(--muted);font-size:12px;font-family:\'IBM Plex Mono\',monospace">'+f.count+' peça(s)</span>'
+      +'<span style="color:'+urgColor(f.max)+';font-weight:700;font-size:13px;font-family:\'IBM Plex Mono\',monospace">'+f.max+'d</span></div></div>'
+      +'<div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+urgColor(f.max)+'"></div></div></div>';
+  }).join('');
+
+  var ah=antigas.length===0?'<div style="color:var(--muted);font-style:italic">Nenhuma peça pendente.</div>':antigas.map(function(p){
+    var m=getMarca(p.marcaId);var d=dias(p.dataEntrada);
+    return '<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="showView(\'detalhe\','+p.id+')">'
+      +'<span class="dias-num '+urgC(d)+'">'+d+'d</span>'
+      +'<div style="flex:1"><div style="color:var(--text);font-weight:600">'+p.descricao+'</div>'
+      +'<div style="color:var(--muted);font-size:12px;margin-top:2px">'+(m?m.nome:'?')+' · '+(p.referencia||'sem ref.')+'</div></div>'
+      +badge(p.status)+'</div>';
+  }).join('');
+
+  return '<div class="stats-grid">'+sh+solBox+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div class="card"><div class="card-title">Por Fornecedor — Pendentes</div>'+fh+'</div>'
+    +'<div class="card"><div class="card-title">Peças Mais Antigas Pendentes</div>'+ah+'</div></div>';
+}
+
+// ── LISTA ─────────────────────────────────────────────────────────────────────
+function renderLista(){
+  var filtradas=pecas.filter(function(p){
+    if(filtroStatus!=='todos'&&p.status!==filtroStatus)return false;
+    if(filtroMarca!=='todos'&&p.marcaId!==parseInt(filtroMarca))return false;
+    if(filtroForn!=='todos'&&p.fornecedorId!==parseInt(filtroForn))return false;
+    return true;
+  });
+  filtradas.sort(function(a,b){return dias(b.dataEntrada)-dias(a.dataEntrada);});
+
+  var cols='52px 1fr 95px 100px 120px 105px 44px';
+  var rows=filtradas.length===0?'<div class="empty-row">Nenhuma peça encontrada.</div>':filtradas.map(function(p){
+    var m=getMarca(p.marcaId);var f=getForn(p.fornecedorId);var d=dias(p.dataEntrada);
+    var solTag=p.solId?'<span style="color:var(--blue);font-size:11px;font-weight:700;font-family:\'IBM Plex Mono\',monospace"> · Sol.Nº'+p.solId+'</span>':'';
+    return '<div class="t-row" style="grid-template-columns:'+cols+'" onclick="showView(\'detalhe\','+p.id+')">'
+      +'<span class="dias-num '+urgC(d)+'">'+d+'</span>'
+      +'<div><div class="t-desc">'+p.descricao+'</div><div class="t-sub">'+(p.motivo||'—')+' '+solTag+'</div></div>'
+      +'<span class="t-ref">'+(p.referencia||'—')+'</span>'
+      +chipMarca(m)
+      +'<span style="color:var(--text2)">'+(f?f.nome:'—')+'</span>'
+      +badge(p.status)
+      +'<span class="t-ver">ver →</span></div>';
+  }).join('');
+
+  var mOpts=marcas.map(function(m){return '<option value="'+m.id+'"'+(filtroMarca==m.id?' selected':'')+'>'+m.nome+'</option>';}).join('');
+  var fOpts=fornecedores.map(function(f){return '<option value="'+f.id+'"'+(filtroForn==f.id?' selected':'')+'>'+f.nome+'</option>';}).join('');
+
+  return '<div class="filters">'
+    +'<select onchange="filtroStatus=this.value;render()">'
+    +'<option value="todos">Todos os status</option>'
+    +'<option value="pendente"'+(filtroStatus==='pendente'?' selected':'')+'>Pendente</option>'
+    +'<option value="solicitado"'+(filtroStatus==='solicitado'?' selected':'')+'>Solicitado</option>'
+    +'<option value="documentando"'+(filtroStatus==='documentando'?' selected':'')+'>Documentando</option>'
+    +'<option value="resolvido"'+(filtroStatus==='resolvido'?' selected':'')+'>Resolvido</option>'
+    +'</select>'
+    +'<select onchange="filtroMarca=this.value;render()"><option value="todos">Todas as marcas</option>'+mOpts+'</select>'
+    +'<select onchange="filtroForn=this.value;render()"><option value="todos">Todos os fornecedores</option>'+fOpts+'</select>'
+    +'<span class="filter-count">'+filtradas.length+' resultado(s)</span></div>'
+    +'<div class="table-wrap">'
+    +'<div class="t-header" style="grid-template-columns:'+cols+'"><span>Dias</span><span>Descrição</span><span>Ref.</span><span>Marca</span><span>Fornecedor</span><span>Status</span><span></span></div>'
+    +rows+'</div>';
+}
+
+// ── DETALHE ───────────────────────────────────────────────────────────────────
+function renderDetalhe(){
+  var p=null;for(var i=0;i<pecas.length;i++){if(pecas[i].id===currentPeca){p=pecas[i];break;}}
+  if(!p)return '<div style="color:var(--muted)">Peça não encontrada.</div>';
+  var m=getMarca(p.marcaId);var f=getForn(p.fornecedorId);var d=dias(p.dataEntrada);
+  var ordem=['pendente','solicitado','documentando','resolvido'];
+  var sC={pendente:'var(--yellow)',solicitado:'var(--blue)',documentando:'var(--purple)',resolvido:'var(--green)'};
+  var sL={pendente:'Pendente',solicitado:'Solicitado',documentando:'Documentando',resolvido:'Resolvido'};
+  var bL={documentando:'→ Marcar como resolvido'};
+  var docsTotal=m?m.docs.length:0;
+  var docsOkLen=p.docsOk?p.docsOk.length:0;
+  var pct=docsTotal?Math.round(docsOkLen/docsTotal*100):0;
+
+  var docsHtml='';
+  if(p.status==='documentando'||p.status==='resolvido'){
+    docsHtml=m?m.docs.map(function(doc){
+      var ok=p.docsOk&&p.docsOk.indexOf(doc)!==-1;
+      var safe=doc.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return '<div class="doc-item" onclick="toggleDoc('+p.id+',\''+safe+'\')"><div class="checkbox'+(ok?' checked':'')+'"></div>'
+        +'<span class="doc-label '+(ok?'done':'pending')+'">'+doc+'</span></div>';
+    }).join(''):'<div style="color:var(--muted)">Nenhuma marca vinculada.</div>';
+  } else {
+    docsHtml='<div style="color:var(--muted);font-size:13px;padding:8px 0">O checklist de documentos fica disponível após a autorização da solicitação.</div>';
+  }
+
+  var fluxo=ordem.map(function(s,i){
+    var idx=ordem.indexOf(p.status);var atual=s===p.status;var passou=idx>i;
+    return '<div class="fluxo-item"><div class="fluxo-dot" style="border-color:'+(atual||passou?sC[s]:'var(--border2)')+';background:'+(passou?sC[s]:'transparent')+'"></div>'
+      +'<span class="fluxo-label" style="color:'+(atual?sC[s]:passou?'var(--muted)':'var(--faint)')+'">'+sL[s]+'</span></div>';
+  }).join('');
+
+  var resHtml='';
+  if(p.status==='documentando'){
+    resHtml='<div class="card"><div class="card-title">Resultado / Retorno</div>'
+      +(p.resultado
+        ?'<div class="resultado-ok">✓ '+p.resultado+'</div><button class="btn-ghost btn-sm" style="margin-top:10px" onclick="limparResultado('+p.id+')">Editar</button>'
+        :'<div class="resultado-form"><input id="inp-resultado" placeholder="Ex: Crédito R$ 120,00 · Troca aprovada">'
+         +'<button class="btn-primary" onclick="salvarResultado('+p.id+')">Salvar</button></div>')
+      +'</div>';
+  }
+
+  var solInfo='';
+  if(p.solId){
+    var sol=getSol(p.solId);
+    solInfo='<div style="background:var(--blue-bg);border:1px solid var(--blue-bd);padding:10px 12px;font-size:12px;color:var(--blue);margin-top:6px;font-weight:600">'
+      +'Incluída na Solicitação Nº'+p.solId+(sol?' — '+badgeSol(sol.statusSol):'')+'</div>';
+  }
+
+  var acaoHtml='';
+  if(p.status==='documentando'){
+    acaoHtml='<button class="btn-green" style="width:100%;padding:13px;margin-bottom:10px" onclick="avancarStatus('+p.id+')">✓ Marcar como resolvido</button>';
+  } else if(p.status==='resolvido'){
+    acaoHtml='<div style="color:var(--green);text-align:center;padding:12px;font-weight:700;background:var(--green-bg);border:1px solid var(--green-bd)">✓ Processo concluído</div>';
+  } else {
+    acaoHtml='<div style="color:var(--muted);font-size:13px;padding:10px;background:var(--surface2);border:1px solid var(--border)">'
+      +(p.status==='pendente'?'Aguardando inclusão em solicitação.':'Aguardando autorização do fornecedor.')
+      +'</div>';
+  }
+
+  var marcaTag=m?'<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:2px solid '+m.cor+';color:'+m.cor+';font-size:12px;font-weight:700">'
+    +'<span style="width:7px;height:7px;border-radius:50%;background:'+m.cor+';display:inline-block"></span>'+m.nome+'</span>':'<span style="color:var(--muted)">—</span>';
+
+  return '<button class="btn-ghost btn-sm" style="margin-bottom:16px" onclick="showView(\'lista\')">← Voltar</button>'
+    +'<div class="detalhe-grid"><div>'
+    +'<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px"><div><div class="det-title">'+p.descricao+'</div>'
+    +'<div style="color:var(--muted);font-size:12px;margin-top:3px">'+(p.referencia?'Ref: '+p.referencia+' · ':'')+'Entrada: '+fmtD(p.dataEntrada)+'</div></div>'+badge(p.status)+'</div>'
+    +'<div class="info-grid">'
+    +'<div class="info-item"><label>Marca</label>'+marcaTag+'</div>'
+    +'<div class="info-item"><label>Fornecedor</label><span>'+(f?f.nome:'—')+'</span></div>'
+    +'<div class="info-item"><label>Tempo parado</label><span class="dias-num '+urgC(d)+'" style="font-size:24px">'+d+' dias</span></div>'
+    +'<div class="info-item"><label>Solicitação</label>'+(p.solId?'<span style="color:var(--blue);font-weight:700">Nº'+p.solId+'</span>':'<span style="color:var(--muted)">Não incluída</span>')+'</div>'
+    +'<div class="info-item full"><label>Motivo</label><span style="color:var(--text2)">'+(p.motivo||'—')+'</span></div>'
+    +'</div>'+solInfo+'</div>'
+    +'<div class="card"><div class="card-title">Documentação — '+(m?m.nome:'?')+'</div>'
+    +docsHtml
+    +(p.status==='documentando'||p.status==='resolvido'?'<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div>'
+     +'<div class="progress-text">'+docsOkLen+' de '+docsTotal+' documentos</div>':'')
+    +'</div>'
+    +resHtml+'</div>'
+    +'<div><div class="card" style="margin-bottom:12px"><div class="card-title">Ações</div>'
+    +acaoHtml
+    +'<button class="btn-danger btn-sm" style="width:100%;margin-top:10px" onclick="excluirPeca('+p.id+')">Excluir peça</button></div>'
+    +'<div class="card"><div class="card-title">Fluxo</div>'+fluxo+'</div></div></div>';
+}
+
+// ── NOVA PEÇA ─────────────────────────────────────────────────────────────────
+function renderNova(){
+  var mOpts=marcas.map(function(m){return '<option value="'+m.id+'">'+m.nome+'</option>';}).join('');
+  var fOpts=fornecedores.map(function(f){return '<option value="'+f.id+'">'+f.nome+'</option>';}).join('');
+  return '<div class="nova-wrap"><div class="nova-title">Registrar Peça Devolvida</div>'
+    +'<div class="card">'
+    +'<div class="field"><label>Descrição da peça *</label><input id="nv-desc" placeholder="Ex: Vela de ignição BKR6E-11"></div>'
+    +'<div class="form-row">'
+    +'<div class="field"><label>Referência / Código</label><input id="nv-ref" placeholder="Ex: BKR6E-11"></div>'
+    +'<div class="field"><label>Preço de custo (R$)</label><input id="nv-preco" type="number" step="0.01" placeholder="0,00"></div>'
+    +'</div>'
+    +'<div class="form-row">'
+    +'<div class="field"><label>Nº NF de Entrada</label><input id="nv-nf" placeholder="Ex: 568762"></div>'
+    +'<div class="field"><label>Data de entrada</label><input id="nv-data" type="date" value="'+today()+'"></div>'
+    +'</div>'
+    +'<div class="form-row">'
+    +'<div class="field"><label>Marca * <small style="color:var(--muted);text-transform:none;letter-spacing:0">(define os docs)</small></label>'
+    +'<select id="nv-marca"><option value="">Selecionar marca...</option>'+mOpts+'</select></div>'
+    +'<div class="field"><label>Fornecedor * <small style="color:var(--muted);text-transform:none;letter-spacing:0">(para quem enviar)</small></label>'
+    +'<select id="nv-forn"><option value="">Selecionar fornecedor...</option>'+fOpts+'</select></div>'
+    +'</div>'
+    +'<div class="field"><label>Motivo da devolução</label><input id="nv-motivo" placeholder="Ex: Queimada prematuramente"></div>'
+    +'<div class="form-actions"><button class="btn-primary" onclick="registrarPeca()">Registrar peça</button>'
+    +'<button class="btn-ghost" onclick="showView(\'lista\')">Cancelar</button></div></div></div>';
+}
+
+// ── SOLICITAÇÕES ──────────────────────────────────────────────────────────────
+function renderSolicitacoes(){
+  // Peças prontas por fornecedor (documentação completa, sem solicitação)
+  var prontas=pecas.filter(function(p){
+    return !p.solId && p.status==='pendente';
+  });
+
+  var prontasPorForn={};
+  for(var i=0;i<prontas.length;i++){
+    var p=prontas[i];var fid=p.fornecedorId;
+    if(!prontasPorForn[fid])prontasPorForn[fid]=[];
+    prontasPorForn[fid].push(p);
+  }
+
+  var novaSecao='';
+  if(prontas.length>0){
+    var fOpts2=Object.keys(prontasPorForn).map(function(fid){
+      var f=getForn(parseInt(fid));
+      return '<option value="'+fid+'">'+(f?f.nome:'?')+' ('+prontasPorForn[fid].length+' peça(s))</option>';
+    }).join('');
+    novaSecao='<div class="card" style="border-color:var(--blue);border-width:2px">'
+      +'<div class="card-title" style="color:var(--blue)">Peças Pendentes — '+prontas.length+' disponível(eis) para solicitação</div>'
+      +'<div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">'
+      +'<div class="field" style="margin:0;flex:1"><label>Gerar solicitação para o fornecedor</label>'
+      +'<select id="sel-forn-sol"><option value="">Selecionar fornecedor...</option>'+fOpts2+'</select></div>'
+      +'<button class="btn-primary" onclick="gerarSolicitacao()">Gerar Solicitação + PDF</button>'
+      +'</div></div>';
+  } else {
+    novaSecao='<div class="card"><div style="color:var(--muted);font-size:13px">Nenhuma peça pendente no momento. Registre novas peças devolvidas para gerar solicitações.</div></div>';
+  }
+
+  var solHtml=solicitacoes.length===0?'':'<div class="card-title" style="margin-top:8px">Solicitações Geradas</div>';
+  var solsSorted=solicitacoes.slice().sort(function(a,b){return b.numero-a.numero;});
+  for(var si=0;si<solsSorted.length;si++){
+    var sol=solsSorted[si];
+    var f2=getForn(sol.fornecedorId);
+    var total=0;
+    var itensHtml='';
+    for(var ii2=0;ii2<sol.itens.length;ii2++){
+      var it=sol.itens[ii2];
+      total+=(it.preco||0)*(it.quant||1);
+      itensHtml+='<tr><td>'+it.referencia+'</td><td>'+it.descricao+'</td><td>'+it.quant+'</td>'
+        +'<td>'+fmtMoney(it.preco)+'</td><td>'+fmtMoney((it.preco||0)*(it.quant||1))+'</td>'
+        +'<td>'+it.nf+'</td><td>'+fmtD(it.dataEntrada)+'</td></tr>';    }
+    // campos de retorno
+    var retHtml='<div class="sol-ret">'
+      +'<div class="sol-ret-item"><label>Data de Envio</label>'
+      +(sol.dataEnvio
+        ?'<span style="color:var(--text2);font-weight:600">'+fmtD(sol.dataEnvio)+'</span>'
+        :'<input id="ret-data-'+sol.id+'" type="date" value="" placeholder="dd/mm/aaaa">'
+       )+'</div>'
+      +'<div class="sol-ret-item"><label>Nº Protocolo / RMA</label>'
+      +(sol.protocolo
+        ?'<span style="color:var(--text2);font-weight:600">'+sol.protocolo+'</span>'
+        :'<input id="ret-prot-'+sol.id+'" placeholder="Ex: RMA-2024-001">'
+       )+'</div>'
+      +'<div class="sol-ret-item"><label>Valor Aprovado</label>'
+      +(sol.valorAprovado!==undefined&&sol.valorAprovado!==''
+        ?'<span style="color:var(--green);font-weight:700;font-family:\'IBM Plex Mono\',monospace">'+fmtMoney(sol.valorAprovado)+'</span>'
+        :'<input id="ret-val-'+sol.id+'" type="number" step="0.01" placeholder="0,00">'
+       )+'</div>'
+      +'</div>';
+
+    var btnStatus='';
+    if(sol.statusSol==='aguardando'){
+      btnStatus='<button class="btn-primary btn-sm" onclick="registrarRetorno('+sol.id+')">Registrar Retorno</button>'
+        +'<button class="btn-ghost btn-sm" onclick="marcarAutorizado('+sol.id+')">✓ Autorizado</button>'
+        +'<button class="btn-danger btn-sm" onclick="marcarNegado('+sol.id+')">✗ Negado</button>';
+    }
+
+    solHtml+='<div class="sol-card">'
+      +'<div class="sol-header">'
+      +'<div><div class="sol-num">Solicitação Nº'+sol.numero+'</div>'
+      +'<div class="sol-meta">'+(f2?f2.nome:'?')+' · Gerada em '+fmtD(sol.dataCriacao)
+      +(sol.dataEnvio?' · Enviada em '+fmtD(sol.dataEnvio):'')+'</div></div>'
+      +badgeSol(sol.statusSol)+'</div>'
+      +'<table class="sol-itens"><thead><tr>'
+      +'<th>Código</th><th>Descrição</th><th>Qtd</th><th>Pr.Custo</th><th>Total</th><th>NF Entrada</th><th>Dt.Emissão</th>'
+      +'</tr></thead><tbody>'+itensHtml+'</tbody></table>'
+      +'<div class="sol-total">Total: '+fmtMoney(total)+'</div>'
+      +'<div class="sol-actions">'
+      +'<button class="btn-blue btn-sm" onclick="imprimirSolicitacao('+sol.id+')">Imprimir / Salvar PDF</button>'
+      +btnStatus
+      +(sol.statusSol!=='aguardando'?'':'')
+      +'<button class="btn-danger btn-sm" onclick="excluirSolicitacao('+sol.id+')">Excluir</button>'
+      +'</div>'
+      +(sol.statusSol==='aguardando'?retHtml:'')
+      +'</div>';
+  }
+
+  return novaSecao+'<div style="margin-top:8px">'+solHtml+'</div>';
+}
+
+// ── MARCAS ────────────────────────────────────────────────────────────────────
+function renderMarcas(){
+  var cards=marcas.map(function(m){
+    var total=0,pend=0;
+    for(var i=0;i<pecas.length;i++){if(pecas[i].marcaId===m.id){total++;if(pecas[i].status!=='resolvido')pend++;}}
+    var docItems=m.docs.map(function(d){return '<div class="cat-item">· '+d+'</div>';}).join('');
+    var delBtn=total===0?'<button class="btn-danger btn-sm" onclick="excluirMarca('+m.id+')">Excluir</button>':'';
+    return '<div class="cat-card">'
+      +'<div class="cat-header"><span style="width:10px;height:10px;background:'+m.cor+';display:inline-block;border-radius:50%"></span>'
+      +'<span class="cat-title">'+m.nome+'</span><span class="cat-meta">'+pend+' pend. / '+total+' total</span></div>'
+      +'<div style="color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-family:\'IBM Plex Mono\',monospace">Documentos exigidos</div>'
+      +docItems
+      +'<div class="cat-actions"><button class="btn-ghost btn-sm" onclick="editarDocsMarca('+m.id+')">Editar docs</button>'+delBtn+'</div>'
+      +'</div>';
+  }).join('');
+  return '<div style="color:var(--muted);font-size:12px;margin-bottom:20px">As marcas definem os documentos necessários para garantia.</div>'
+    +'<div class="catalog-grid">'+cards+'</div>'
+    +'<div class="card"><div class="card-title">Adicionar Marca</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:end">'
+    +'<div class="field" style="margin:0"><label>Nome</label><input id="nm-nome" placeholder="Ex: Delphi"></div>'
+    +'<div class="field" style="margin:0"><label>Documentos (vírgula)</label><input id="nm-docs" placeholder="NF de devolução, Laudo técnico"></div>'
+    +'<button class="btn-primary btn-sm" onclick="adicionarMarca()">Adicionar</button>'
+    +'</div></div>';
+}
+
+// ── FORNECEDORES ──────────────────────────────────────────────────────────────
+function renderFornecedores(){
+  var cards=fornecedores.map(function(f){
+    var total=0,pend=0;
+    for(var i=0;i<pecas.length;i++){if(pecas[i].fornecedorId===f.id){total++;if(pecas[i].status!=='resolvido')pend++;}}
+    var nSols=solicitacoes.filter(function(s){return s.fornecedorId===f.id;}).length;
+    var delBtn=total===0?'<button class="btn-danger btn-sm" onclick="excluirForn('+f.id+')">Excluir</button>':'';
+    return '<div class="cat-card">'
+      +'<div class="cat-header"><span style="width:10px;height:10px;background:var(--border2);display:inline-block;border-radius:50%"></span>'
+      +'<span class="cat-title">'+f.nome+'</span><span class="cat-meta">'+pend+' pend. / '+nSols+' solic.</span></div>'
+      +'<div class="cat-actions"><button class="btn-ghost btn-sm" onclick="editarNomeForn('+f.id+')">Editar nome</button>'+delBtn+'</div>'
+      +'</div>';
+  }).join('');
+  return '<div style="color:var(--muted);font-size:13px;margin-bottom:14px">Os fornecedores são para quem você envia fisicamente as peças.</div>'
+    +'<div class="catalog-grid">'+cards+'</div>'
+    +'<div class="card"><div class="card-title">Adicionar Fornecedor</div>'
+    +'<div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">'
+    +'<div class="field" style="margin:0"><label>Nome do fornecedor</label><input id="nf-nome" placeholder="Ex: COMDIP"></div>'
+    +'<button class="btn-primary btn-sm" onclick="adicionarForn()">Adicionar</button>'
+    +'</div></div>';
+}
+
+// ── AÇÕES PEÇAS ───────────────────────────────────────────────────────────────
+function avancarStatus(id){
+  var ordem=['pendente','documentando','enviado','resolvido'];
+  for(var i=0;i<pecas.length;i++){if(pecas[i].id===id){var idx=ordem.indexOf(pecas[i].status);if(idx<3)pecas[i].status=ordem[idx+1];break;}}
+  save('gf_pecas5',pecas);toast('Status atualizado ✓');render();
+}
+function excluirPeca(id){
+  var p=null;for(var i=0;i<pecas.length;i++){if(pecas[i].id===id){p=pecas[i];break;}}
+  showConfirm('Excluir peça','Excluir "'+p.descricao+'"?',function(){
+    var novo=[];for(var i=0;i<pecas.length;i++){if(pecas[i].id!==id)novo.push(pecas[i]);}pecas=novo;
+    save('gf_pecas5',pecas);toast('Peça excluída');showView('lista');
+  });
+}
+function toggleDoc(pecaId,doc){
+  for(var i=0;i<pecas.length;i++){
+    if(pecas[i].id===pecaId){
+      var p=pecas[i];if(!p.docsOk)p.docsOk=[];
+      var idx=p.docsOk.indexOf(doc);
+      if(idx===-1)p.docsOk.push(doc);else p.docsOk.splice(idx,1);
+      var m=getMarca(p.marcaId);
+      if(m&&p.docsOk.length>=m.docs.length&&p.status==='pendente')p.status='documentando';
+      break;
+    }
+  }
+  save('gf_pecas5',pecas);render();
+}
+function salvarResultado(id){
+  var v=document.getElementById('inp-resultado');
+  if(!v||!v.value.trim()){toast('Digite o resultado.');return;}
+  for(var i=0;i<pecas.length;i++){if(pecas[i].id===id){pecas[i].resultado=v.value.trim();break;}}
+  save('gf_pecas5',pecas);toast('Resultado salvo ✓');render();
+}
+function limparResultado(id){
+  for(var i=0;i<pecas.length;i++){if(pecas[i].id===id){pecas[i].resultado='';break;}}
+  save('gf_pecas5',pecas);render();
+}
+function registrarPeca(){
+  var desc=document.getElementById('nv-desc');
+  var mEl=document.getElementById('nv-marca');
+  var fEl=document.getElementById('nv-forn');
+  if(!desc||!desc.value.trim()||!mEl||!mEl.value||!fEl||!fEl.value){toast('Preencha descrição, marca e fornecedor.');return;}
+  var nova={
+    id:genId(),descricao:desc.value.trim(),
+    referencia:(document.getElementById('nv-ref')||{value:''}).value.trim(),
+    preco:parseFloat((document.getElementById('nv-preco')||{value:'0'}).value)||0,
+    nf:(document.getElementById('nv-nf')||{value:''}).value.trim(),
+    marcaId:parseInt(mEl.value),fornecedorId:parseInt(fEl.value),
+    dataEntrada:(document.getElementById('nv-data')||{value:today()}).value||today(),
+    status:'pendente',
+    motivo:(document.getElementById('nv-motivo')||{value:''}).value.trim(),
+    docsOk:[],resultado:'',solId:null
+  };
+  pecas.unshift(nova);save('gf_pecas5',pecas);toast('Peça registrada ✓');showView('lista');
+}
+
+// ── AÇÕES SOLICITAÇÕES ────────────────────────────────────────────────────────
+function gerarSolicitacao(){
+  var sel=document.getElementById('sel-forn-sol');
+  if(!sel||!sel.value){toast('Selecione o fornecedor.');return;}
+  var fornId=parseInt(sel.value);
+  var prontas=pecas.filter(function(p){
+    return p.fornecedorId===fornId && !p.solId && p.status==='pendente';
+  });
+  if(!prontas.length){toast('Nenhuma peça pronta para esse fornecedor.');return;}
+
+  var numero=(solicitacoes.length>0?Math.max.apply(null,solicitacoes.map(function(s){return s.numero;}))+1:1000+solicitacoes.length+1);
+  var itens=prontas.map(function(p){
+    return{id:p.id,referencia:p.referencia||'—',descricao:p.descricao,quant:1,preco:p.preco||0,nf:p.nf||'—',dataEntrada:p.dataEntrada};
+  });
+  var sol={
+    id:genId(),numero:numero,fornecedorId:fornId,
+    dataCriacao:today(),dataEnvio:'',protocolo:'',valorAprovado:'',
+    statusSol:'aguardando',itens:itens
+  };
+  solicitacoes.push(sol);
+  save('gf_sols',solicitacoes);
+
+  // marcar peças como solicitado
+  for(var i=0;i<pecas.length;i++){
+    for(var j=0;j<prontas.length;j++){
+      if(pecas[i].id===prontas[j].id){pecas[i].solId=sol.id;pecas[i].status='solicitado';break;}
+    }
+  }
+  save('gf_pecas5',pecas);
+  toast('Solicitação Nº'+numero+' gerada ✓');
+  render();
+  setTimeout(function(){imprimirSolicitacao(sol.id);},400);
+}
+
+function registrarRetorno(solId){
+  var dataEl=document.getElementById('ret-data-'+solId);
+  var protEl=document.getElementById('ret-prot-'+solId);
+  var valEl =document.getElementById('ret-val-'+solId);
+  for(var i=0;i<solicitacoes.length;i++){
+    if(solicitacoes[i].id===solId){
+      if(dataEl&&dataEl.value)solicitacoes[i].dataEnvio=dataEl.value;
+      if(protEl&&protEl.value)solicitacoes[i].protocolo=protEl.value.trim();
+      if(valEl&&valEl.value!=='')solicitacoes[i].valorAprovado=parseFloat(valEl.value)||0;
+      break;
+    }
+  }
+  save('gf_sols',solicitacoes);toast('Retorno registrado ✓');render();
+}
+function marcarAutorizado(solId){
+  for(var i=0;i<solicitacoes.length;i++){if(solicitacoes[i].id===solId){solicitacoes[i].statusSol='autorizado';break;}}
+  save('gf_sols',solicitacoes);
+  // mover peças para documentando (checklist liberado)
+  var sol=getSol(solId);
+  if(sol){for(var j=0;j<sol.itens.length;j++){for(var k=0;k<pecas.length;k++){if(pecas[k].id===sol.itens[j].id){pecas[k].status='documentando';break;}}}}
+  save('gf_pecas5',pecas);toast('Autorizado ✓ — peças liberadas para documentação');render();
+}
+function marcarNegado(solId){
+  for(var i=0;i<solicitacoes.length;i++){if(solicitacoes[i].id===solId){solicitacoes[i].statusSol='negado';break;}}
+  save('gf_sols',solicitacoes);toast('Solicitação marcada como negada.');render();
+}
+function excluirSolicitacao(solId){
+  showConfirm('Excluir solicitação','As peças voltarão ao status anterior.',function(){
+    var sol=getSol(solId);
+    if(sol){for(var j=0;j<sol.itens.length;j++){for(var k=0;k<pecas.length;k++){if(pecas[k].id===sol.itens[j].id){pecas[k].solId=null;pecas[k].status='pendente';break;}}}}
+    var novo=[];for(var i=0;i<solicitacoes.length;i++){if(solicitacoes[i].id!==solId)novo.push(solicitacoes[i]);}solicitacoes=novo;
+    save('gf_sols',solicitacoes);save('gf_pecas5',pecas);toast('Solicitação excluída');render();
+  });
+}
+
+// ── IMPRIMIR PDF ──────────────────────────────────────────────────────────────
+function imprimirSolicitacao(solId){
+  var sol=getSol(solId);if(!sol)return;
+  var f=getForn(sol.fornecedorId);
+  var total=0;
+  var rows='';
+  for(var i=0;i<sol.itens.length;i++){
+    var it=sol.itens[i];
+    var subtotal=(it.preco||0)*(it.quant||1);
+    total+=subtotal;
+    rows+='<tr><td>'+it.referencia+'</td><td>'+it.descricao+'</td><td style="text-align:center">'+it.quant+'</td>'
+      +'<td style="text-align:right">'+fmtMoney(it.preco)+'</td>'
+      +'<td style="text-align:right">'+fmtMoney(subtotal)+'</td>'
+      +'<td>'+it.nf+'</td><td>'+fmtD(it.dataEntrada)+'</td></tr>';
+  }
+  var dataEnvio=sol.dataEnvio?fmtD(sol.dataEnvio):'____/____/________';
+  var html='<html><head><meta charset="UTF-8">'
+    +'<style>'
+    +'body{font-family:Arial,sans-serif;font-size:11px;color:#000;margin:0;padding:20px;}'
+    +'h2{font-size:16px;text-align:center;letter-spacing:2px;margin:12px 0 4px;}'
+    +'.info{font-size:11px;margin-bottom:2px;}'
+    +'table{width:100%;border-collapse:collapse;margin:12px 0;font-size:10px;}'
+    +'th{border:1px solid #999;background:#eee;padding:4px 6px;text-align:left;}'
+    +'td{border:1px solid #ccc;padding:4px 6px;}'
+    +'.total{text-align:right;font-weight:bold;font-size:12px;margin:6px 0 16px;}'
+    +'.sig{margin-top:32px;display:flex;justify-content:space-between;}'
+    +'.sig-line{width:46%;border-top:1px solid #000;padding-top:4px;font-size:10px;}'
+    +'</style></head><body>'
+    +'<div style="text-align:right;font-size:11px;">'+EMPRESA.nome+'<br>'+EMPRESA.cnpj+'</div>'
+    +'<h2>SOLICITAÇÃO DE GARANTIA</h2>'
+    +'<div class="info">Garantia No..: <b>'+sol.numero+'</b>&nbsp;&nbsp;&nbsp;'
+    +'Data Emissão..: <b>'+fmtD(sol.dataCriacao)+'</b></div>'
+    +'<div class="info">Fornecedor...: <b>'+(f?f.nome:'—')+'</b></div>'
+    +'<table><thead><tr>'
+    +'<th>Código do Item</th><th>Descrição</th><th>Quant</th><th>Pr.Custo</th><th>Total</th><th>No.Nt.Entrada</th><th>Data Emissão</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="total">Quantidade de Itens: '+sol.itens.length+'&nbsp;&nbsp;&nbsp;Total dos Itens: '+fmtMoney(total)+'</div>'
+    +'<div class="info">Data de Envio: '+dataEnvio+'</div>'
+    +'<div style="border-top:1px solid #999;margin:8px 0"></div>'
+    +'<div class="sig">'
+    +'<div class="sig-line">Assinatura Resp. Loja</div>'
+    +'<div class="sig-line">Assinatura Resp. Fornecedor</div>'
+    +'</div>'
+    +'</body></html>';
+
+  var win=window.open('','_blank','width=800,height=600');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function(){win.print();},600);
+}
+
+// ── AÇÕES MARCAS ──────────────────────────────────────────────────────────────
+function adicionarMarca(){
+  var n=document.getElementById('nm-nome');
+  if(!n||!n.value.trim()){toast('Informe o nome.');return;}
+  var de=document.getElementById('nm-docs');
+  var docs=de&&de.value?de.value.split(',').map(function(d){return d.trim();}).filter(Boolean):[];
+  var cores=['#E05555','#60A5FA','#FB923C','#4ADE80','#C084FC','#F472B6','#34D399','#FBBF24'];
+  var cor=cores[marcas.length%cores.length];
+  marcas.push({id:genId(),nome:n.value.trim(),cor:cor,docs:docs.length?docs:['NF de devolução']});
+  save('gf_marcas2',marcas);toast('Marca adicionada ✓');render();
+}
+function excluirMarca(id){
+  var m=getMarca(id);
+  showConfirm('Excluir marca','Excluir "'+m.nome+'"?',function(){
+    var novo=[];for(var i=0;i<marcas.length;i++){if(marcas[i].id!==id)novo.push(marcas[i]);}marcas=novo;
+    save('gf_marcas2',marcas);toast('Marca removida');render();
+  });
+}
+function editarDocsMarca(id){
+  var m=getMarca(id);
+  var novo=prompt('Documentos exigidos por '+m.nome+' (separar por vírgula):',m.docs.join(', '));
+  if(novo===null)return;
+  var docs=novo.split(',').map(function(d){return d.trim();}).filter(Boolean);
+  for(var i=0;i<marcas.length;i++){if(marcas[i].id===id){marcas[i].docs=docs;break;}}
+  save('gf_marcas2',marcas);toast('Documentos atualizados ✓');render();
+}
+
+// ── AÇÕES FORNECEDORES ────────────────────────────────────────────────────────
+function adicionarForn(){
+  var n=document.getElementById('nf-nome');
+  if(!n||!n.value.trim()){toast('Informe o nome.');return;}
+  fornecedores.push({id:genId(),nome:n.value.trim()});
+  save('gf_forns2',fornecedores);toast('Fornecedor adicionado ✓');render();
+}
+function excluirForn(id){
+  var f=getForn(id);
+  showConfirm('Excluir fornecedor','Excluir "'+f.nome+'"?',function(){
+    var novo=[];for(var i=0;i<fornecedores.length;i++){if(fornecedores[i].id!==id)novo.push(fornecedores[i]);}fornecedores=novo;
+    save('gf_forns2',fornecedores);toast('Fornecedor removido');render();
+  });
+}
+function editarNomeForn(id){
+  var f=getForn(id);
+  var novo=prompt('Nome do fornecedor:',f.nome);
+  if(novo===null||!novo.trim())return;
+  for(var i=0;i<fornecedores.length;i++){if(fornecedores[i].id===id){fornecedores[i].nome=novo.trim();break;}}
+  save('gf_forns2',fornecedores);toast('Nome atualizado ✓');render();
+}
+
+render();
+</script>
+</body>
+</html>
