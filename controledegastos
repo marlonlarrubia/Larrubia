@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1117">
+<title>Controle · Marlon</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #0f1117;
+    --s1:     #161920;
+    --s2:     #1c1f28;
+    --s3:     #222633;
+    --border: #2a2e3d;
+    --border2:#353a4e;
+    --text:   #dde0ec;
+    --muted:  #565d7a;
+    --dim:    #3a3f55;
+
+```
+--green:  #7ecb6a;
+--red:    #e06060;
+--orange: #e09a50;
+--blue:   #5f9be0;
+--teal:   #50c8a8;
+--gold:   #d4b84a;
+
+--sans:  'Syne', sans-serif;
+--serif: 'Instrument Serif', Georgia, serif;
+
+--tab-h: 64px;
+--safe-bottom: env(safe-area-inset-bottom, 0px);
+```
+
+}
+
+- { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html, body { height:100%; overflow:hidden; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: var(–sans);
+font-size: 14px;
+display: flex;
+flex-direction: column;
+max-width: 480px;
+margin: 0 auto;
+position: relative;
+}
+
+/* ── HEADER ── */
+.app-header {
+padding: 20px 20px 12px;
+background: var(–bg);
+border-bottom: 1px solid var(–border);
+flex-shrink: 0;
+position: relative;
+z-index: 10;
+}
+
+.app-header-top {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 4px;
+}
+
+.app-title {
+font-family: var(–serif);
+font-size: 1.5rem;
+font-weight: 400;
+line-height: 1.1;
+color: var(–text);
+}
+
+.app-title em { font-style: italic; color: var(–teal); }
+
+.month-badge {
+font-size: .65rem;
+letter-spacing: .1em;
+text-transform: uppercase;
+color: var(–muted);
+background: var(–s2);
+border: 1px solid var(–border);
+border-radius: 20px;
+padding: 4px 10px;
+margin-top: 4px;
+}
+
+.header-saldo {
+display: flex;
+gap: 12px;
+margin-top: 10px;
+}
+
+.hs-item {
+flex: 1;
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 8px 10px;
+}
+
+.hs-label { font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(–muted); margin-bottom: 2px; }
+.hs-val   { font-family: var(–serif); font-size: 1.1rem; line-height: 1; }
+
+/* ── SCROLL AREA ── */
+.scroll-area {
+flex: 1;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+padding-bottom: calc(var(–tab-h) + var(–safe-bottom) + 16px);
+}
+
+/* ── TABS ── */
+.tab-bar {
+position: fixed;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 100%;
+max-width: 480px;
+height: calc(var(–tab-h) + var(–safe-bottom));
+background: var(–s1);
+border-top: 1px solid var(–border);
+display: flex;
+align-items: flex-start;
+padding-top: 8px;
+z-index: 100;
+}
+
+.tab-btn {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 3px;
+padding: 4px 0;
+background: none;
+border: none;
+cursor: pointer;
+color: var(–muted);
+font-family: var(–sans);
+transition: color .2s;
+}
+
+.tab-btn.active { color: var(–teal); }
+
+.tab-icon { font-size: 1.2rem; line-height: 1; }
+.tab-label { font-size: .58rem; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ── PANELS ── */
+.panel { display: none; padding: 16px; }
+.panel.active { display: block; }
+
+/* ── SECTION TITLE ── */
+.sec {
+font-size: .6rem;
+letter-spacing: .18em;
+text-transform: uppercase;
+color: var(–muted);
+margin: 20px 0 10px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.sec::after { content:’’; flex:1; height:1px; background:var(–border); }
+.sec:first-child { margin-top: 4px; }
+
+/* ── ADD EXPENSE FORM ── */
+.add-form {
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 4px;
+}
+
+.form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.form-row:last-child { margin-bottom: 0; }
+
+.form-input {
+flex: 1;
+background: var(–s2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 10px 12px;
+color: var(–text);
+font-family: var(–sans);
+font-size: .82rem;
+outline: none;
+transition: border-color .2s;
+-webkit-appearance: none;
+}
+
+.form-input:focus { border-color: var(–teal); }
+.form-input::placeholder { color: var(–muted); }
+
+.form-select {
+flex: 1;
+background: var(–s2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 10px 12px;
+color: var(–text);
+font-family: var(–sans);
+font-size: .82rem;
+outline: none;
+-webkit-appearance: none;
+appearance: none;
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath d=‘M1 1l5 5 5-5’ stroke=’%23565d7a’ stroke-width=‘1.5’ fill=‘none’ stroke-linecap=‘round’/%3E%3C/svg%3E”);
+background-repeat: no-repeat;
+background-position: right 12px center;
+padding-right: 32px;
+}
+
+.btn-add {
+width: 100%;
+background: var(–teal);
+color: #0f1117;
+border: none;
+border-radius: 8px;
+padding: 12px;
+font-family: var(–sans);
+font-size: .78rem;
+font-weight: 600;
+letter-spacing: .08em;
+text-transform: uppercase;
+cursor: pointer;
+transition: opacity .2s;
+-webkit-appearance: none;
+}
+
+.btn-add:active { opacity: .8; }
+
+/* ── EXPENSE LIST ── */
+.expense-list { display: flex; flex-direction: column; gap: 6px; }
+
+.expense-item {
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 12px 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+animation: slideIn .25s ease both;
+}
+
+@keyframes slideIn {
+from { opacity:0; transform:translateY(8px); }
+to   { opacity:1; transform:translateY(0); }
+}
+
+.exp-cat-dot {
+width: 8px; height: 8px;
+border-radius: 50%;
+flex-shrink: 0;
+}
+
+.exp-info { flex: 1; min-width: 0; }
+.exp-name { font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-meta { font-size: .62rem; color: var(–muted); margin-top: 1px; }
+
+.exp-val {
+font-family: var(–serif);
+font-size: .95rem;
+font-weight: 400;
+white-space: nowrap;
+}
+
+.exp-del {
+background: none;
+border: none;
+color: var(–dim);
+font-size: 1rem;
+cursor: pointer;
+padding: 4px;
+line-height: 1;
+transition: color .2s;
+flex-shrink: 0;
+}
+.exp-del:active { color: var(–red); }
+
+.empty-state {
+text-align: center;
+padding: 32px 16px;
+color: var(–muted);
+font-size: .75rem;
+line-height: 1.7;
+}
+
+.empty-state .empty-icon { font-size: 2rem; margin-bottom: 8px; }
+
+/* ── CATEGORY TOTALS ── */
+.cat-totals { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+
+.cat-row {
+display: flex;
+align-items: center;
+gap: 10px;
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 10px 12px;
+}
+
+.cat-info { flex: 1; }
+.cat-name { font-size: .76rem; margin-bottom: 4px; }
+.cat-bar-track { height: 3px; background: var(–s3); border-radius: 2px; }
+.cat-bar-fill  { height: 100%; border-radius: 2px; transition: width .6s ease; }
+.cat-vals { text-align: right; font-size: .72rem; white-space: nowrap; }
+.cat-spent { font-weight: 600; }
+.cat-budget { color: var(–muted); font-size: .62rem; }
+
+/* ── CHECKLIST ── */
+.checklist { display: flex; flex-direction: column; gap: 6px; }
+
+.check-item {
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 14px;
+display: flex;
+align-items: center;
+gap: 12px;
+transition: background .2s, border-color .2s;
+cursor: pointer;
+-webkit-user-select: none;
+user-select: none;
+}
+
+.check-item.done {
+background: rgba(126,203,106,.05);
+border-color: rgba(126,203,106,.25);
+}
+
+.check-item.overdue {
+background: rgba(224,96,96,.05);
+border-color: rgba(224,96,96,.25);
+}
+
+.check-box {
+width: 22px; height: 22px;
+border-radius: 6px;
+border: 2px solid var(–border2);
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+font-size: .8rem;
+transition: all .2s;
+}
+
+.check-item.done .check-box {
+background: var(–green);
+border-color: var(–green);
+}
+
+.check-item.overdue .check-box {
+border-color: var(–red);
+}
+
+.check-info { flex: 1; }
+.check-name { font-size: .8rem; }
+.check-item.done .check-name { text-decoration: line-through; color: var(–muted); }
+.check-sub  { font-size: .62rem; color: var(–muted); margin-top: 2px; }
+
+.check-val {
+font-family: var(–serif);
+font-size: .95rem;
+white-space: nowrap;
+}
+
+.check-item.done .check-val { color: var(–green); }
+.check-item.overdue .check-val { color: var(–red); }
+
+/* ── RESUMO ── */
+.resumo-hero {
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 18px;
+margin-bottom: 12px;
+text-align: center;
+}
+
+.rh-label { font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; color: var(–muted); margin-bottom: 4px; }
+.rh-val { font-family: var(–serif); font-size: 2.4rem; font-style: italic; line-height: 1; margin-bottom: 4px; }
+.rh-sub { font-size: .7rem; color: var(–muted); }
+
+.resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+
+.rg-card {
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 12px;
+}
+
+.rg-label { font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(–muted); margin-bottom: 4px; }
+.rg-val   { font-family: var(–serif); font-size: 1.25rem; line-height: 1; }
+.rg-sub   { font-size: .62rem; color: var(–muted); margin-top: 2px; }
+
+/* RESERVA PROGRESS */
+.reserva-card {
+background: var(–s1);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 16px;
+margin-bottom: 8px;
+}
+
+.rc-header {
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+margin-bottom: 10px;
+}
+
+.rc-title { font-size: .76rem; font-weight: 600; }
+.rc-pct   { font-family: var(–serif); font-size: 1.1rem; }
+
+.rc-bar-track {
+height: 8px;
+background: var(–s3);
+border-radius: 4px;
+margin-bottom: 6px;
+overflow: hidden;
+}
+
+.rc-bar-fill {
+height: 100%;
+border-radius: 4px;
+background: linear-gradient(90deg, var(–teal), var(–green));
+transition: width .8s cubic-bezier(.23,1,.32,1);
+}
+
+.rc-vals {
+display: flex;
+justify-content: space-between;
+font-size: .62rem;
+color: var(–muted);
+}
+
+/* EXPORT BTN */
+.btn-export {
+width: 100%;
+background: var(–s2);
+border: 1px solid var(–border2);
+border-radius: 10px;
+padding: 14px;
+color: var(–text);
+font-family: var(–sans);
+font-size: .75rem;
+font-weight: 600;
+letter-spacing: .08em;
+text-transform: uppercase;
+cursor: pointer;
+transition: background .2s;
+margin-top: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+.btn-export:active { background: var(–s3); }
+
+/* RESERVA EDIT */
+.reserva-edit {
+display: flex;
+gap: 8px;
+margin-top: 10px;
+}
+
+.reserva-edit input {
+flex: 1;
+background: var(–s2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 8px 12px;
+color: var(–text);
+font-family: var(–sans);
+font-size: .8rem;
+outline: none;
+}
+
+.reserva-edit input:focus { border-color: var(–teal); }
+
+.btn-sm {
+background: var(–teal);
+color: #0f1117;
+border: none;
+border-radius: 8px;
+padding: 8px 14px;
+font-family: var(–sans);
+font-size: .72rem;
+font-weight: 600;
+cursor: pointer;
+white-space: nowrap;
+}
+
+/* PILLS */
+.status-pill {
+font-size: .58rem;
+letter-spacing: .06em;
+text-transform: uppercase;
+padding: 2px 7px;
+border-radius: 20px;
+border: 1px solid;
+white-space: nowrap;
+}
+
+.ok   { color:var(–green);  border-color:rgba(126,203,106,.3);  background:rgba(126,203,106,.08); }
+.over { color:var(–red);    border-color:rgba(224,96,96,.3);    background:rgba(224,96,96,.08); }
+.warn { color:var(–orange); border-color:rgba(224,154,80,.3);   background:rgba(224,154,80,.08); }
+
+/* COLOR MAP */
+.c-green  { color: var(–green); }
+.c-red    { color: var(–red); }
+.c-orange { color: var(–orange); }
+.c-blue   { color: var(–blue); }
+.c-teal   { color: var(–teal); }
+.c-gold   { color: var(–gold); }
+.c-muted  { color: var(–muted); }
+
+/* SCROLLBAR */
+.scroll-area::-webkit-scrollbar { width: 0; }
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<div class="app-header">
+  <div class="app-header-top">
+    <div class="app-title">Controle <em>Financeiro</em></div>
+    <div class="month-badge" id="monthBadge">—</div>
+  </div>
+  <div class="header-saldo">
+    <div class="hs-item">
+      <div class="hs-label">Gasto até agora</div>
+      <div class="hs-val c-red" id="hdrGasto">R$ 0</div>
+    </div>
+    <div class="hs-item">
+      <div class="hs-label">Orçamento mensal</div>
+      <div class="hs-val c-muted">R$ 6.700</div>
+    </div>
+    <div class="hs-item">
+      <div class="hs-label">Saldo</div>
+      <div class="hs-val" id="hdrSaldo">R$ 6.700</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCROLL AREA -->
+
+<div class="scroll-area">
+
+  <!-- ═══════ GASTOS ═══════ -->
+
+  <div class="panel active" id="panel-gastos">
+
+```
+<div class="sec">registrar gasto</div>
+
+<div class="add-form">
+  <div class="form-row">
+    <input class="form-input" id="expDesc" type="text" placeholder="Descrição (ex: Mercado Extra)" autocomplete="off">
+  </div>
+  <div class="form-row">
+    <input class="form-input" id="expVal" type="number" placeholder="Valor (R$)" inputmode="decimal" step="0.01" min="0">
+    <select class="form-select" id="expCat">
+      <option value="mercado">🛒 Mercado</option>
+      <option value="restaurante">🍽️ Restaurante</option>
+      <option value="delivery">📦 Delivery</option>
+      <option value="combustivel">⛽ Combustível</option>
+      <option value="moradia">🏠 Moradia</option>
+      <option value="saude">🏥 Saúde/Bem-estar</option>
+      <option value="transporte">🛵 Transporte</option>
+      <option value="lazer">🎉 Lazer</option>
+      <option value="outros">💸 Outros</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <input class="form-input" id="expDate" type="date">
+  </div>
+  <button class="btn-add" onclick="addExpense()">+ Adicionar Gasto</button>
+</div>
+
+<div class="sec">por categoria</div>
+<div class="cat-totals" id="catTotals"></div>
+
+<div class="sec">todos os lançamentos</div>
+<div class="expense-list" id="expenseList">
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    Nenhum gasto registrado ainda.<br>Use o formulário acima para começar.
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ═══════ CHECKLIST ═══════ -->
+
+  <div class="panel" id="panel-check">
+
+```
+<div class="sec">compromissos fixos — vencimento mensal</div>
+<div class="checklist" id="checkFixos"></div>
+
+<div class="sec">transferências — dia 5</div>
+<div class="checklist" id="checkTransf"></div>
+```
+
+  </div>
+
+  <!-- ═══════ RESUMO ═══════ -->
+
+  <div class="panel" id="panel-resumo">
+
+```
+<div class="sec">saldo do mês</div>
+
+<div class="resumo-hero">
+  <div class="rh-label">Total gasto no mês</div>
+  <div class="rh-val" id="resumoTotal" style="color:var(--red)">R$ 0</div>
+  <div class="rh-sub" id="resumoSub">de R$ 6.700 orçados</div>
+</div>
+
+<div class="resumo-grid">
+  <div class="rg-card">
+    <div class="rg-label">Alimentação</div>
+    <div class="rg-val" id="resAlim" style="color:var(--orange)">R$ 0</div>
+    <div class="rg-sub">meta: R$ 2.900</div>
+  </div>
+  <div class="rg-card">
+    <div class="rg-label">Moradia</div>
+    <div class="rg-val" id="resMor" style="color:var(--blue)">R$ 0</div>
+    <div class="rg-sub">meta: R$ 2.300</div>
+  </div>
+  <div class="rg-card">
+    <div class="rg-label">Transporte</div>
+    <div class="rg-val" id="resTrans" style="color:var(--gold)">R$ 0</div>
+    <div class="rg-sub">meta: R$ 1.000</div>
+  </div>
+  <div class="rg-card">
+    <div class="rg-label">Bem-estar</div>
+    <div class="rg-val" id="resBem" style="color:var(--teal)">R$ 0</div>
+    <div class="rg-sub">meta: R$ 500</div>
+  </div>
+</div>
+
+<div class="sec">checklist — status</div>
+
+<div class="resumo-grid" style="margin-bottom:12px">
+  <div class="rg-card" style="text-align:center">
+    <div class="rg-label">Compromissos</div>
+    <div class="rg-val c-green" id="resCheckFixos">0/6</div>
+    <div class="rg-sub">pagos</div>
+  </div>
+  <div class="rg-card" style="text-align:center">
+    <div class="rg-label">Transferências</div>
+    <div class="rg-val c-teal" id="resCheckTransf">0/2</div>
+    <div class="rg-sub">realizadas</div>
+  </div>
+</div>
+
+<div class="sec">reserva de emergência</div>
+
+<div class="reserva-card">
+  <div class="rc-header">
+    <div class="rc-title">Meta: R$ 30.000</div>
+    <div class="rc-pct c-teal" id="reservaPct">33%</div>
+  </div>
+  <div class="rc-bar-track">
+    <div class="rc-bar-fill" id="reservaBar" style="width:33%"></div>
+  </div>
+  <div class="rc-vals">
+    <span id="reservaAtual">R$ 10.000 atual</span>
+    <span id="reservaFalta">R$ 20.000 faltam</span>
+  </div>
+  <div class="reserva-edit">
+    <input type="number" id="reservaInput" placeholder="Atualizar valor (R$)" inputmode="decimal">
+    <button class="btn-sm" onclick="updateReserva()">Salvar</button>
+  </div>
+</div>
+
+<button class="btn-export" onclick="exportData()">
+  📤 Exportar resumo para enviar
+</button>
+```
+
+  </div>
+
+</div>
+
+<!-- TAB BAR -->
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('gastos', this)">
+    <div class="tab-icon">💳</div>
+    <div class="tab-label">Gastos</div>
+  </button>
+  <button class="tab-btn" onclick="switchTab('check', this)">
+    <div class="tab-icon">✅</div>
+    <div class="tab-label">Checklist</div>
+  </button>
+  <button class="tab-btn" onclick="switchTab('resumo', this)">
+    <div class="tab-icon">📊</div>
+    <div class="tab-label">Resumo</div>
+  </button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+
+const BUDGET = 6700;
+const MONTH_KEY = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+};
+
+const CAT_CONFIG = {
+  mercado:     { label:'Mercado',       color:'#e09a50', budget:2000, group:'alim' },
+  restaurante: { label:'Restaurante',   color:'#ce7a40', budget:600,  group:'alim' },
+  delivery:    { label:'Delivery',      color:'#b86a30', budget:300,  group:'alim' },
+  combustivel: { label:'Combustível',   color:'#d4b84a', budget:1000, group:'trans' },
+  moradia:     { label:'Moradia',       color:'#5f9be0', budget:2300, group:'mor' },
+  saude:       { label:'Saúde/Bem-est', color:'#50c8a8', budget:500,  group:'bem' },
+  transporte:  { label:'Transporte',    color:'#9bd458', budget:200,  group:'trans' },
+  lazer:       { label:'Lazer',         color:'#c87ad4', budget:300,  group:'outro' },
+  outros:      { label:'Outros',        color:'#7a8aaa', budget:200,  group:'outro' },
+};
+
+const CHECKLIST_FIXOS = [
+  { id:'aluguel',  name:'Aluguel',          val:'R$ 1.800', dia:'Todo dia 5',  group:'fixo' },
+  { id:'cond',     name:'Condomínio',        val:'R$ 300',   dia:'Todo dia 10', group:'fixo' },
+  { id:'agua',     name:'Conta de água',     val:'~R$ 200',  dia:'Vencimento',  group:'fixo' },
+  { id:'academia', name:'Academia',          val:'R$ 200',   dia:'Todo dia 1',  group:'fixo' },
+  { id:'internet', name:'Internet',          val:'Mensal',   dia:'Vencimento',  group:'fixo' },
+  { id:'fatura',   name:'Fatura cartão',     val:'Total',    dia:'Vencimento',  group:'fixo' },
+];
+
+const CHECKLIST_TRANSF = [
+  { id:'reserva',  name:'Transferência — Reserva',     val:'R$ 700',  dia:'Dia 5', group:'transf' },
+  { id:'invest',   name:'Transferência — Investimento', val:'R$ 300',  dia:'Dia 5', group:'transf' },
+];
+
+// ══════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════
+
+function getExpenses() {
+  try {
+    return JSON.parse(localStorage.getItem('exp_' + MONTH_KEY()) || '[]');
+  } catch(e) { return []; }
+}
+
+function saveExpenses(arr) {
+  localStorage.setItem('exp_' + MONTH_KEY(), JSON.stringify(arr));
+}
+
+function getChecks() {
+  try {
+    return JSON.parse(localStorage.getItem('chk_' + MONTH_KEY()) || '{}');
+  } catch(e) { return {}; }
+}
+
+function saveChecks(obj) {
+  localStorage.setItem('chk_' + MONTH_KEY(), JSON.stringify(obj));
+}
+
+function getReserva() {
+  return parseFloat(localStorage.getItem('reserva') || '10000');
+}
+
+function saveReserva(v) {
+  localStorage.setItem('reserva', String(v));
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'resumo') renderResumo();
+  if (id === 'check')  renderChecklists();
+}
+
+// ══════════════════════════════════════════
+// EXPENSES
+// ══════════════════════════════════════════
+
+function addExpense() {
+  const desc = document.getElementById('expDesc').value.trim();
+  const val  = parseFloat(document.getElementById('expVal').value);
+  const cat  = document.getElementById('expCat').value;
+  const date = document.getElementById('expDate').value;
+
+  if (!desc || isNaN(val) || val <= 0) {
+    document.getElementById(desc ? 'expVal' : 'expDesc').style.borderColor = '#e06060';
+    setTimeout(() => {
+      document.getElementById('expDesc').style.borderColor = '';
+      document.getElementById('expVal').style.borderColor = '';
+    }, 1200);
+    return;
+  }
+
+  const expenses = getExpenses();
+  expenses.unshift({
+    id: Date.now(),
+    desc,
+    val,
+    cat,
+    date: date || new Date().toISOString().split('T')[0]
+  });
+  saveExpenses(expenses);
+
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expVal').value  = '';
+
+  renderExpenses();
+  updateHeader();
+}
+
+function deleteExpense(id) {
+  const expenses = getExpenses().filter(e => e.id !== id);
+  saveExpenses(expenses);
+  renderExpenses();
+  updateHeader();
+}
+
+function fmt(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function renderExpenses() {
+  const expenses = getExpenses();
+  const list = document.getElementById('expenseList');
+
+  if (expenses.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>Nenhum gasto registrado ainda.<br>Use o formulário acima para começar.</div>`;
+    renderCatTotals([]);
+    return;
+  }
+
+  list.innerHTML = expenses.map(e => {
+    const cfg = CAT_CONFIG[e.cat] || CAT_CONFIG.outros;
+    const d = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'short'}) : '';
+    return `
+      <div class="expense-item">
+        <div class="exp-cat-dot" style="background:${cfg.color}"></div>
+        <div class="exp-info">
+          <div class="exp-name">${e.desc}</div>
+          <div class="exp-meta">${cfg.label} · ${d}</div>
+        </div>
+        <div class="exp-val" style="color:${cfg.color}">${fmt(e.val)}</div>
+        <button class="exp-del" onclick="deleteExpense(${e.id})">✕</button>
+      </div>`;
+  }).join('');
+
+  renderCatTotals(expenses);
+}
+
+function renderCatTotals(expenses) {
+  const totals = {};
+  expenses.forEach(e => {
+    totals[e.cat] = (totals[e.cat] || 0) + e.val;
+  });
+
+  const cats = Object.keys(CAT_CONFIG).filter(k => totals[k] > 0);
+  if (cats.length === 0) {
+    document.getElementById('catTotals').innerHTML = '';
+    return;
+  }
+
+  const maxVal = Math.max(...cats.map(k => CAT_CONFIG[k].budget));
+
+  document.getElementById('catTotals').innerHTML = cats.map(k => {
+    const cfg = CAT_CONFIG[k];
+    const spent = totals[k] || 0;
+    const pct = Math.min((spent / cfg.budget) * 100, 100);
+    const over = spent > cfg.budget;
+    return `
+      <div class="cat-row">
+        <div class="cat-info">
+          <div class="cat-name">${cfg.label}</div>
+          <div class="cat-bar-track">
+            <div class="cat-bar-fill" style="width:${pct}%;background:${over ? '#e06060' : cfg.color}"></div>
+          </div>
+        </div>
+        <div class="cat-vals">
+          <div class="cat-spent" style="color:${over ? '#e06060' : cfg.color}">${fmt(spent)}</div>
+          <div class="cat-budget">meta ${fmt(cfg.budget)}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════════
+
+function renderChecklists() {
+  const checks = getChecks();
+  const now = new Date().getDate();
+
+  function renderGroup(items, containerId) {
+    document.getElementById(containerId).innerHTML = items.map(item => {
+      const done = !!checks[item.id];
+      // overdue logic: only for items with specific days
+      const overdue = !done && item.id === 'aluguel' && now > 7;
+      return `
+        <div class="check-item ${done ? 'done' : ''} ${overdue ? 'overdue' : ''}"
+             onclick="toggleCheck('${item.id}')">
+          <div class="check-box">${done ? '✓' : ''}</div>
+          <div class="check-info">
+            <div class="check-name">${item.name}</div>
+            <div class="check-sub">${item.dia}</div>
+          </div>
+          <div class="check-val">${item.val}</div>
+        </div>`;
+    }).join('');
+  }
+
+  renderGroup(CHECKLIST_FIXOS, 'checkFixos');
+  renderGroup(CHECKLIST_TRANSF, 'checkTransf');
+}
+
+function toggleCheck(id) {
+  const checks = getChecks();
+  checks[id] = !checks[id];
+  saveChecks(checks);
+  renderChecklists();
+}
+
+// ══════════════════════════════════════════
+// RESERVA
+// ══════════════════════════════════════════
+
+function updateReserva() {
+  const input = document.getElementById('reservaInput');
+  const v = parseFloat(input.value);
+  if (isNaN(v) || v < 0) return;
+  saveReserva(v);
+  input.value = '';
+  renderResumo();
+}
+
+// ══════════════════════════════════════════
+// RESUMO
+// ══════════════════════════════════════════
+
+function renderResumo() {
+  const expenses = getExpenses();
+  const checks   = getChecks();
+
+  const total = expenses.reduce((s,e) => s + e.val, 0);
+  const saldo = BUDGET - total;
+
+  document.getElementById('resumoTotal').textContent = fmt(total);
+  document.getElementById('resumoTotal').style.color = total > BUDGET ? '#e06060' : '#e09a50';
+
+  // Group totals
+  const alim  = expenses.filter(e => ['mercado','restaurante','delivery'].includes(e.cat)).reduce((s,e) => s+e.val, 0);
+  const mor   = expenses.filter(e => e.cat === 'moradia').reduce((s,e) => s+e.val, 0);
+  const trans = expenses.filter(e => ['combustivel','transporte'].includes(e.cat)).reduce((s,e) => s+e.val, 0);
+  const bem   = expenses.filter(e => e.cat === 'saude').reduce((s,e) => s+e.val, 0);
+
+  document.getElementById('resAlim').textContent  = fmt(alim);
+  document.getElementById('resMor').textContent   = fmt(mor);
+  document.getElementById('resTrans').textContent = fmt(trans);
+  document.getElementById('resBem').textContent   = fmt(bem);
+
+  document.getElementById('resAlim').style.color  = alim  > 2900 ? '#e06060' : '#e09a50';
+  document.getElementById('resMor').style.color   = mor   > 2300 ? '#e06060' : '#5f9be0';
+  document.getElementById('resTrans').style.color = trans > 1000 ? '#e06060' : '#d4b84a';
+  document.getElementById('resBem').style.color   = bem   > 500  ? '#e06060' : '#50c8a8';
+
+  // Checklist status
+  const fixosDone  = CHECKLIST_FIXOS.filter(i => checks[i.id]).length;
+  const transfDone = CHECKLIST_TRANSF.filter(i => checks[i.id]).length;
+  document.getElementById('resCheckFixos').textContent  = `${fixosDone}/${CHECKLIST_FIXOS.length}`;
+  document.getElementById('resCheckTransf').textContent = `${transfDone}/${CHECKLIST_TRANSF.length}`;
+  document.getElementById('resCheckFixos').style.color  = fixosDone  === CHECKLIST_FIXOS.length  ? '#7ecb6a' : '#e09a50';
+  document.getElementById('resCheckTransf').style.color = transfDone === CHECKLIST_TRANSF.length ? '#50c8a8' : '#e09a50';
+
+  // Reserva
+  const reserva = getReserva();
+  const meta    = 30000;
+  const pct     = Math.min((reserva / meta) * 100, 100);
+  const falta   = Math.max(meta - reserva, 0);
+  document.getElementById('reservaPct').textContent  = Math.round(pct) + '%';
+  document.getElementById('reservaBar').style.width  = pct + '%';
+  document.getElementById('reservaAtual').textContent = fmt(reserva) + ' atual';
+  document.getElementById('reservaFalta').textContent = fmt(falta) + ' faltam';
+}
+
+// ══════════════════════════════════════════
+// HEADER
+// ══════════════════════════════════════════
+
+function updateHeader() {
+  const expenses = getExpenses();
+  const total = expenses.reduce((s,e) => s + e.val, 0);
+  const saldo = BUDGET - total;
+
+  document.getElementById('hdrGasto').textContent = fmt(total);
+  document.getElementById('hdrSaldo').textContent = fmt(Math.abs(saldo));
+  document.getElementById('hdrSaldo').style.color = saldo >= 0 ? '#7ecb6a' : '#e06060';
+
+  const now = new Date();
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  document.getElementById('monthBadge').textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+}
+
+// ══════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════
+
+function exportData() {
+  const expenses = getExpenses();
+  const checks   = getChecks();
+  const reserva  = getReserva();
+  const total    = expenses.reduce((s,e) => s + e.val, 0);
+  const now      = new Date();
+  const months   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  const alim  = expenses.filter(e => ['mercado','restaurante','delivery'].includes(e.cat)).reduce((s,e) => s+e.val, 0);
+  const mor   = expenses.filter(e => e.cat === 'moradia').reduce((s,e) => s+e.val, 0);
+  const trans = expenses.filter(e => ['combustivel','transporte'].includes(e.cat)).reduce((s,e) => s+e.val, 0);
+  const bem   = expenses.filter(e => e.cat === 'saude').reduce((s,e) => s+e.val, 0);
+
+  const fixosDone  = CHECKLIST_FIXOS.filter(i => checks[i.id]).length;
+  const transfDone = CHECKLIST_TRANSF.filter(i => checks[i.id]).length;
+
+  const catTotals = {};
+  expenses.forEach(e => { catTotals[e.cat] = (catTotals[e.cat] || 0) + e.val; });
+
+  let text = `📊 RESUMO FINANCEIRO — ${months[now.getMonth()].toUpperCase()} ${now.getFullYear()}\n`;
+  text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  text += `💰 TOTAL GASTO: ${fmt(total)} / ${fmt(BUDGET)}\n`;
+  text += `📈 SALDO: ${fmt(BUDGET - total)}\n\n`;
+  text += `📦 POR GRUPO:\n`;
+  text += `  Alimentação: ${fmt(alim)} (meta R$ 2.900)\n`;
+  text += `  Moradia: ${fmt(mor)} (meta R$ 2.300)\n`;
+  text += `  Transporte: ${fmt(trans)} (meta R$ 1.000)\n`;
+  text += `  Bem-estar: ${fmt(bem)} (meta R$ 500)\n\n`;
+  text += `✅ CHECKLIST:\n`;
+  text += `  Compromissos fixos: ${fixosDone}/${CHECKLIST_FIXOS.length}\n`;
+  text += `  Transferências: ${transfDone}/${CHECKLIST_TRANSF.length}\n\n`;
+  text += `🏦 RESERVA: ${fmt(reserva)} / R$ 30.000 (${Math.round((reserva/30000)*100)}%)\n\n`;
+  text += `📋 TODOS OS LANÇAMENTOS:\n`;
+  expenses.forEach(e => {
+    const d = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+    text += `  ${d} · ${e.desc} · ${fmt(e.val)} · ${CAT_CONFIG[e.cat]?.label || 'Outros'}\n`;
+  });
+
+  if (navigator.share) {
+    navigator.share({ title: `Resumo ${months[now.getMonth()]}`, text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => {
+      alert('Resumo copiado! Cole no chat para análise.');
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('Resumo copiado! Cole no chat para análise.');
+    });
+  }
+}
+
+// ══════════════════════════════════════════
+// SET DEFAULT DATE
+// ══════════════════════════════════════════
+
+document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+updateHeader();
+renderExpenses();
+</script>
+
+</body>
+</html>
